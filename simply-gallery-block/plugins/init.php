@@ -139,8 +139,8 @@ function pgc_sgb_add_albums_preset_page() {
             'postType'       => PGC_SGB_POST_TYPE,
             'ajaxurl'        => admin_url( 'admin-ajax.php' ),
             'nonce'          => wp_create_nonce( 'pgc-sgb-nonce' ),
-            'isPremium'      => json_encode( pgc_sgb_fs()->can_use_premium_code() ),
-            'isPro'          => json_encode( pgc_sgb_fs()->is_plan_or_trial( 'pro' ) ),
+            'isPremium'      => wp_json_encode( pgc_sgb_fs()->can_use_premium_code() ),
+            'isPro'          => wp_json_encode( pgc_sgb_fs()->is_plan_or_trial( 'pro' ) ),
             'skinsSettings'  => $pgc_sgb_skins_presets,
             'albumShcPreset' => get_option( 'pgc_sgb_album_shc_preset' ),
             'version'        => PGC_SGB_VERSION,
@@ -149,7 +149,7 @@ function pgc_sgb_add_albums_preset_page() {
     }
 
     function pgc_sgb_plugin_albums_sh_page() {
-        echo '<div id="' . PGC_SGB_PLUGIN_SLUG . '-prem-page"></div>';
+        echo '<div id="' . esc_html( PGC_SGB_PLUGIN_SLUG ) . '-prem-page"></div>';
     }
 
     $pr_sub_page_albums_hook_suffix = add_submenu_page(
@@ -204,7 +204,7 @@ function pgc_sgb_add_blocks_preset_page() {
     }
 
     function pgc_sgb_print_global_preset() {
-        echo '<div id="' . PGC_SGB_PLUGIN_SLUG . '-settings-page"></div>';
+        echo '<div id="' . esc_html( PGC_SGB_PLUGIN_SLUG ) . '-settings-page"></div>';
     }
 
     $pr_sub_page_hook_suffix = add_submenu_page(
@@ -256,7 +256,7 @@ function pgc_sgb_add_lightbox_admin_page() {
     }
 
     function pgc_sgb_plugin_lightbox_admin_page() {
-        echo '<div id="' . PGC_SGB_PLUGIN_SLUG . '-lightbox-page"></div>';
+        echo '<div id="' . esc_html( PGC_SGB_PLUGIN_SLUG ) . '-lightbox-page"></div>';
     }
 
     $pr_sub_page_lightbox_hook_suffix = add_submenu_page(
@@ -304,7 +304,7 @@ function pgc_sgb_add_welcome_page() {
     }
 
     function pgc_sgb_print_welcome_page() {
-        echo '<div id="' . PGC_SGB_PLUGIN_SLUG . '-welcome-page"></div>';
+        echo '<div id="' . esc_html( PGC_SGB_PLUGIN_SLUG ) . '-welcome-page"></div>';
     }
 
     if ( current_user_can( 'upload_files' ) ) {

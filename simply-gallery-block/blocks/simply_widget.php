@@ -22,12 +22,12 @@ class SimpLy_Widgets extends WP_Widget
 			return;
 		}
 		$shortcode = '[' . PGC_SGB_POST_TYPE . ' id="' . $galleryId . '"]';
-		echo $args['before_widget'];
+		echo $args['before_widget']; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 		if ($title) {
-			echo $args['before_title'] . $title . $args['after_title'];
+			echo $args['before_title'] . $title . $args['after_title']; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 		}
 		echo do_shortcode($shortcode);
-		echo $args['after_widget'];
+		echo $args['after_widget']; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 	}
 	public function update($new_instance, $old_instance)
 	{

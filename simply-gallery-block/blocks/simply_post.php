@@ -197,7 +197,7 @@ function pgc_sgb_render_albums_blocks_callback($atr, $content)
 			. esc_attr($atr['galleryId']) . '">'
 			. esc_html__('SimpLy Album EMPTY', 'simply-gallery-block') . '</div>';
 	}
-	$galleryData = isset($atrFromPreset) ? json_encode($atrFromPreset) : json_encode($atr);
+	$galleryData = isset($atrFromPreset) ? wp_json_encode($atrFromPreset) : wp_json_encode($atr);
 	$align = '';
 	if (isset($atr['align'])) {
 		$align = $align . 'align' . $atr['align'];
@@ -430,7 +430,7 @@ function pgc_sgb_register_post_type()
 		array(
 			'labels'              => array(
 				'name'                  => _x('SimpLy Galleries', 'Post Type General Name', 'simply-gallery-block'),
-				'singular_name'         => _x('SimpLy Gallery', 'simply-gallery-block'),
+				'singular_name'         => __('SimpLy Gallery', 'simply-gallery-block'),
 				'menu_name'             => __('SimpLy Gallery', 'simply-gallery-block'),
 				'all_items'         		=> __('Galleries', 'simply-gallery-block'),
 				'add_new'               => __('Add New', 'simply-gallery-block'),
@@ -518,6 +518,7 @@ function pgc_sgb_galleries_permalink_settings()
 	$curren_archive_base = get_option('pgc_sgb_archive_galleries_base');
 	$curren_archive_galleries_base = $curren_archive_base ? $curren_archive_base : $default_archive_base;
 
+	/* translators: %s: Home URL */
 	echo wp_kses_post(wpautop(sprintf(
 		__('If you like, you may enter custom structures for your SimpLy gallery URLs here. For example, using <code>pgc_simply_gallery</code> would make your gallery links like <code>%spgc_simply_gallery/simply-gallery/</code>. This setting affects gallery URLs only.', 'simply-gallery-block'),
 		esc_url(home_url('/'))
@@ -823,11 +824,11 @@ function pgc_sgb_custom_columns_data($column, $post_id)
 				$src = PGC_SGB_URL . 'assets/icon-75x75.png';
 			}
 			// Display the cover.
-			echo '<img src="' . esc_url($src) . '" width="75" />'; // @codingStandardsIgnoreLine
+			echo '<img src="' . esc_html($src) . '" width="75" />'; // @codingStandardsIgnoreLine
 			break;
 		case 'shortcode':
 			echo '<code class="pgc-sgb-onclick-selection" role="button" tabIndex="0" aria-hidden="true">';
-			echo '[pgc_simply_gallery id="' . $post_id . '"]';
+			echo '[pgc_simply_gallery id="' . esc_html($post_id) . '"]';
 			echo '</code>';
 			break;
 	}
@@ -839,7 +840,7 @@ function pgc_sgb_adding_custom_meta_boxes($post)
 }
 function pgc_sgb_render_meta_box($post)
 {
-	echo '<div id="' . PGC_SGB_SLUG . '-post-editor"></div>';
+	echo '<div id="' . esc_html(PGC_SGB_SLUG) . '-post-editor"></div>';
 }
 /** 5.8 */
 function pgc_sgb_allow_my_block_types($allowed_block_types_all, $block_editor_context)

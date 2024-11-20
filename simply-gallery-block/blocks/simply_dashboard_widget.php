@@ -40,7 +40,7 @@ function pgc_sgb_dashboard_enqueue_scripts() {
 }
 
 function pgc_sgb_dashboard_widget_render() {
-    echo '<div id="' . PGC_SGB_SLUG . '-dashboard-widget"><div class="pgc-sgb-preloader">LOADING...</div></div>';
+    echo '<div id="' . esc_html( PGC_SGB_SLUG ) . '-dashboard-widget"><div class="pgc-sgb-preloader">LOADING...</div></div>';
 }
 
 function pgc_sgb_add_dashboard_widget() {

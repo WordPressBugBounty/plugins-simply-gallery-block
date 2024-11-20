@@ -6,7 +6,7 @@
  * Description: The highly customizable Lightbox for native WordPress Gallery/Image. And beautiful gallery blocks with advanced Lightbox for photographers, video creators, writers and content marketers. This blocks set will help you create responsive Images, Video, Audio gallery. Three desired layout in one plugin - Masonry, Justified and Grid.
  * Author: GalleryCreator
  * Author URI: https://blockslib.com/
- * Version: 3.2.4.2
+ * Version: 3.2.4.3
  * Text Domain: simply-gallery-block
  * Domain Path: /languages
  * License: GPL2+
@@ -23,7 +23,7 @@ if ( !defined( 'ABSPATH' ) ) {
 if ( function_exists( 'pgc_sgb_fs' ) ) {
     pgc_sgb_fs()->set_basename( false, __FILE__ );
 } else {
-    define( 'PGC_SGB_VERSION', '3.2.4.2' );
+    define( 'PGC_SGB_VERSION', '3.2.4.3' );
     define( 'PGC_SGB_SLUG', 'simply-gallery-block' );
     define( 'PGC_SGB_BLOCK_PREF', 'wp-block-pgcsimplygalleryblock-' );
     define( 'PGC_SGB_PLUGIN_SLUG', 'pgc-simply-gallery-plugin' );
@@ -131,10 +131,10 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
         if ( $meta && ('image' === $type || !empty( $meta['sizes'] )) ) {
             $sizes = array();
             $possible_sizes = apply_filters( 'image_size_names_choose', array(
-                'thumbnail' => __( 'Thumbnail' ),
-                'medium'    => __( 'Medium' ),
-                'large'     => __( 'Large' ),
-                'full'      => __( 'Full Size' ),
+                'thumbnail' => __( 'Thumbnail', 'simply-gallery-block' ),
+                'medium'    => __( 'Medium', 'simply-gallery-block' ),
+                'large'     => __( 'Large', 'simply-gallery-block' ),
+                'full'      => __( 'Full Size', 'simply-gallery-block' ),
             ) );
             unset($possible_sizes['full']);
             foreach ( $possible_sizes as $size => $label ) {
@@ -328,16 +328,21 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
     function pgc_sgb_action_wizard() {
         global $post, $pgc_sgb_wc_to_sgb;
         check_ajax_referer( 'pgc-sgb-nonce', 'nonce' );
-        $globaldata = sanitize_text_field( stripslashes( $_POST['props'] ) );
-        $json = json_decode( $globaldata, true );
+        $json = array();
         $out = array();
         $out['message'] = array();
         $data = array();
+        if ( isset( $_POST['props'] ) ) {
+            $globaldata = sanitize_text_field( wp_unslash( $_POST['props'] ) );
+            $json = json_decode( $globaldata, true );
+        }
         switch ( $json['type'] ) {
             case 'create_post_thumbnail':
                 if ( current_user_can( 'add_post_meta', intval( $json['postId'] ) ) ) {
                     $videoName = sanitize_text_field( wp_unslash( $json['name'] ) );
-                    $imgData = wp_unslash( $_POST['thumb_raw_data'] );
+                    if ( isset( $_POST['thumb_raw_data'] ) ) {
+                        $imgData = wp_unslash( $_POST['thumb_raw_data'] );
+                    }
                     if ( isset( $imgData ) ) {
                         $uploadsDir = wp_upload_dir();
                         $posterName = $videoName . '_poster';
@@ -407,7 +412,8 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
                 break;
             case 'update_post_meta':
                 if ( current_user_can( 'add_post_meta', intval( $json['postId'] ) ) ) {
-                    $out['message'][$json['key']] = update_post_meta( $json['postId'], $json['key'], $json['value'] );
+                    $out['message'][$json['key']] = update_post_meta( $json['postId'], $json['key'], sanitize_text_field( $json['value'] ) );
+                    $out['message']['test'] = sanitize_text_field( $json['value'] );
                 }
                 break;
             case 'add_posts_meta':
@@ -571,7 +577,7 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
                             $main_meta['tags'] = $tags;
                         }
                         if ( !empty( $main_meta ) ) {
-                            $data[$json['iDs'][$i]] = json_encode( $main_meta );
+                            $data[$json['iDs'][$i]] = wp_json_encode( $main_meta );
                         }
                     }
                 }
@@ -764,7 +770,7 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
         }
         $out['message']['data'] = $data;
         header( 'Content-Type: application/json; charset=' . get_option( 'blog_charset' ), true );
-        echo json_encode( $out );
+        echo wp_json_encode( $out );
         wp_die();
     }
 

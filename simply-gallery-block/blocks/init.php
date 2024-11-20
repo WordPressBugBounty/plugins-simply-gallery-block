@@ -146,8 +146,8 @@ function pgc_sgb_action_customize_preview_init() {
 
 function pgc_sgb_ajaxQueryAttachmentsArgs(  $query  ) {
     if ( isset( $_REQUEST['query']['pgc_sgb'] ) && isset( $_REQUEST['query']['terms'] ) && isset( $_REQUEST['query']['taxonomy'] ) ) {
-        $taxonomy = sanitize_text_field( $_REQUEST['query']['taxonomy'] );
-        $terms = sanitize_text_field( $_REQUEST['query']['terms'] );
+        $taxonomy = sanitize_text_field( wp_unslash( $_REQUEST['query']['taxonomy'] ) );
+        $terms = sanitize_text_field( wp_unslash( $_REQUEST['query']['terms'] ) );
         if ( is_array( $terms ) ) {
             $terms = array_map( 'intval', $terms );
         } else {
