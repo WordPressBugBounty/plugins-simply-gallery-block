@@ -6,7 +6,7 @@ Tags: image gallery, video gallery, lightbox, gallery, wordpress gallery plugin
 Requires at least: 6.6
 Tested up to: 6.7
 Requires PHP: 5.3.8
-Stable tag: 3.2.4.4
+Stable tag: 3.2.4.5
 License: GPL-2.0
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -126,6 +126,10 @@ Please note that you easily convert block gallery from Masonry to Justified or t
 Yes! SimpLy Gallery Blocks's core features are absolutely free.
 
 == Changelog ==
+
+= 3.2.4.5 =
+* Updated: Internal improvements
+* Fixed: Block Viewer - add "alt-text"
 
 = 3.2.4.4 =
 * Updated: Internal improvements
