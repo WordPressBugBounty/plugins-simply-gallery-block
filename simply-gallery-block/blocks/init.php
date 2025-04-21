@@ -116,7 +116,7 @@ function pgc_sgb_render_callback(  $atr, $content  ) {
     }
     $className = PGC_SGB_BLOCK_PREF . sanitize_html_class( $skinType ) . ' ' . sanitize_html_class( $align );
     if ( isset( $atr['className'] ) ) {
-        $className = $className . ' ' . $atr['className'];
+        $className = $className . ' ' . sanitize_html_class( $atr['className'] );
     }
     if ( $skinType === 'slider' || $skinType === 'splitcarousel' || $skinType === 'horizon' || $skinType === 'accordion' || $skinType === 'showcase' ) {
         $minHeight = ( isset( $atr['sliderMaxHeight'] ) ? esc_attr( $atr['sliderMaxHeight'] ) : 400 );
@@ -129,8 +129,18 @@ function pgc_sgb_render_callback(  $atr, $content  ) {
 	<div class="sgb-square" style="background:' . esc_attr( $preloaderColor ) . '"></div>
 	<div class="sgb-square" style="background:' . esc_attr( $preloaderColor ) . '"></div>
 	<div class="sgb-square" style="background:' . esc_attr( $preloaderColor ) . '"></div></div>';
-    $html = '<div class="pgc-sgb-cb ' . $className . '" data-gallery-id="' . esc_attr( $atr['galleryId'] ) . '"' . (( isset( $style ) ? $style : '' )) . '>' . $preloder . $noscript . '<script type="application/json" class="sgb-data">' . $galleryData . '</script>' . '<script>(function(){if(window.PGC_SGB && window.PGC_SGB.searcher){window.PGC_SGB.searcher.initBlocks()}})()</script>' . '</div>';
+    $html = '<div class="pgc-sgb-cb ' . $className . '" data-gallery-id="' . esc_attr( $atr['galleryId'] ) . '"' . (( isset( $style ) ? pgc_sgb_sanitize_custom_css( $style ) : '' )) . '>' . $preloder . $noscript . '<script type="application/json" class="sgb-data">' . $galleryData . '</script>' . '<script>(function(){if(window.PGC_SGB && window.PGC_SGB.searcher){window.PGC_SGB.searcher.initBlocks()}})()</script>' . '</div>';
     return $html;
+}
+
+function pgc_sgb_sanitize_custom_css(  $css  ) {
+    $css = preg_replace( '#/\\*.*?\\*/#s', '', $css );
+    $css = preg_replace( '/expression\\s*\\(.*?\\)/i', '', $css );
+    $css = preg_replace( '/url\\s*\\(\\s*[\'"]?\\s*javascript\\s*:[^)]*\\)/i', '', $css );
+    $css = preg_replace( '/javascript\\s*:[^;"}]*/i', '', $css );
+    $css = preg_replace( '/on\\w+\\s*=\\s*"[^"]*"/i', '', $css );
+    $css = preg_replace( '/@import[^;]+;/i', '', $css );
+    return esc_attr( trim( $css ) );
 }
 
 function pgc_sgb_noscript_style() {
