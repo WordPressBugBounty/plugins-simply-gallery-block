@@ -197,7 +197,7 @@ function pgc_sgb_render_albums_blocks_callback($atr, $content)
 			. esc_attr($atr['galleryId']) . '">'
 			. esc_html__('SimpLy Album EMPTY', 'simply-gallery-block') . '</div>';
 	}
-	$galleryData = isset($atrFromPreset) ? wp_json_encode($atrFromPreset) : wp_json_encode($atr);
+	$galleryData = isset($atrFromPreset) ? $atrFromPreset : $atr;
 	$align = '';
 	if (isset($atr['align'])) {
 		$align = $align . 'align' . $atr['align'];
@@ -218,7 +218,7 @@ function pgc_sgb_render_albums_blocks_callback($atr, $content)
 	<div class="sgb-square" style="background:' . $preloaderColor . '"></div></div>';
 	$html = '<div class="pgc-sgb-cb ' . esc_attr($className)	. '" data-gallery-id="' . $atr['galleryId'] . '">'
 		. $preloder . $noscript
-		. '<script type="application/json" class="sgb-data">' . wp_kses_post($galleryData) . '</script>'
+		. '<script type="application/json" class="sgb-data">' . wp_json_encode($galleryData) . '</script>'
 		. '<script type="text/javascript">(function(){if(window.PGC_SGB && window.PGC_SGB.searcher){window.PGC_SGB.searcher.initBlocks()}})()</script>'
 		. '</div>';
 	return $html;
@@ -278,7 +278,9 @@ function pgc_sgb_register_posts_block()
 	register_block_type(
 		'pgcsimplygalleryblock/galleries',
 		array(
+			'api_version'    => 3,
 			'title' 				=> 'Saved SimlpLy Gallery',
+			'description' => 'Display saved SimpLy Gallery.',
 			'style'         => PGC_SGB_SLUG . '-frontend',
 			'editor_script' => PGC_SGB_SLUG . '-post-blocks-script',
 			'editor_style'  => PGC_SGB_SLUG . '-post-blocks-style',
@@ -295,7 +297,9 @@ function pgc_sgb_register_posts_block()
 	register_block_type(
 		'pgcsimplygalleryblock/albums',
 		array(
+			'api_version'    => 3,
 			'title' 				=> 'Albums',
+			'description' => 'Display SimpLy Album.',
 			'style'         => PGC_SGB_SLUG . '-frontend',
 			'editor_script' => PGC_SGB_SLUG . '-post-blocks-script',
 			'editor_style'  => PGC_SGB_SLUG . '-albums',
@@ -312,7 +316,9 @@ function pgc_sgb_register_posts_block()
 	register_block_type(
 		'pgcsimplygalleryblock/albumnavigator',
 		array(
+			'api_version'    => 3,
 			'title' 				=> 'Album Navigator',
+			'description' => 'Display SimpLy Album - Modal Window.',
 			'style'         => PGC_SGB_SLUG . '-frontend',
 			'editor_script' => PGC_SGB_SLUG . '-post-blocks-script',
 			'editor_style'  => PGC_SGB_SLUG . '-albumnavigator',

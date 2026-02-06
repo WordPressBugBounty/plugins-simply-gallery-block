@@ -38,7 +38,7 @@ function pgc_sgb_plugin_init() {
     $globalJS = array(
         'ajaxurl'        => admin_url( 'admin-ajax.php' ),
         'nonce'          => wp_create_nonce( 'pgc-sgb-nonce' ),
-        'lightboxPreset' => get_option( 'pgc_sgb_lightbox' ),
+        'lightboxPreset' => pgc_sgb_get_preset_by_slug( 'pgc_sgb_lightbox' ),
         'globalLightbox' => $pgc_sgb_global_lightbox_use,
     );
     wp_localize_script( PGC_SGB_PLUGIN_SLUG . '-script', 'PGC_SGB_LIGHTBOX', $globalJS );
@@ -55,7 +55,7 @@ function pgc_sgb_plugin_frontend_scripts() {
     if ( $pgc_sgb_global_lightbox_use && is_object( $post ) && ($post->post_type === 'post' || $post->post_type === 'page') ) {
         $lightboxURL = PGC_SGB_URL . 'plugins/pgc_sgb_lightbox.min.js';
         $lightboxStyleURL = PGC_SGB_URL . 'plugins/pgc_sgb_lightbox.min.style.css';
-        $lightboxPreset = get_option( 'pgc_sgb_lightbox' );
+        $lightboxPreset = pgc_sgb_get_preset_by_slug( 'pgc_sgb_lightbox' );
         $field_value = get_post_meta( $post->ID, 'pgc_sgb_lightbox_settings', true );
         if ( isset( $field_value ) && $field_value !== '' ) {
             $field_value = json_decode( $field_value, true );
@@ -193,7 +193,7 @@ function pgc_sgb_add_blocks_preset_page() {
             'ajaxurl'        => admin_url( 'admin-ajax.php' ),
             'nonce'          => wp_create_nonce( 'pgc-sgb-nonce' ),
             'globalLightbox' => $pgc_sgb_global_lightbox_use,
-            'lightboxPreset' => get_option( 'pgc_sgb_lightbox' ),
+            'lightboxPreset' => pgc_sgb_get_preset_by_slug( 'pgc_sgb_lightbox' ),
             'skinsSettings'  => $pgc_sgb_skins_presets,
             'version'        => PGC_SGB_VERSION,
         );
@@ -246,7 +246,7 @@ function pgc_sgb_add_lightbox_admin_page() {
             'ajaxurl'        => admin_url( 'admin-ajax.php' ),
             'nonce'          => wp_create_nonce( 'pgc-sgb-nonce' ),
             'globalLightbox' => $pgc_sgb_global_lightbox_use,
-            'lightboxPreset' => get_option( 'pgc_sgb_lightbox' ),
+            'lightboxPreset' => pgc_sgb_get_preset_by_slug( 'pgc_sgb_lightbox' ),
             'version'        => PGC_SGB_VERSION,
         );
         wp_localize_script( PGC_SGB_PLUGIN_SLUG . '-lightbox-page-settings-script', 'PGC_SGB_OPTIONS_PAGE', $globalJS );

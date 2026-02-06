@@ -1,24 +1,25 @@
-=== Gallery Blocks with Lightbox. Image Gallery, (HTML5 video , YouTube, Vimeo) Video Gallery and Lightbox for native gallery ===
+=== Mixed Media Gallery Blocks ===
 Author URI: https://blockslib.com/
 Plugin URI: https://simplygallery.co
 Contributors: gallerycreator
-Tags: image gallery, video gallery, lightbox, gallery, wordpress gallery plugin
+Tags: media gallery, mixed media, video gallery, lightbox, gallery blocks
 Requires at least: 6.6
-Tested up to: 6.8
+Tested up to: 6.9
 Requires PHP: 5.3.8
-Stable tag: 3.2.7
+Stable tag: 3.3.2.1
 License: GPL-2.0
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Two in One. Gutenberg gallery blocks (Masonry, Justified, Slider, Carousel, Grid) and highly customizable lightbox.
-
+Create mixed media galleries with images, HTML5 video, YouTube, Vimeo, and VideoPress — all in one gallery by Simply Gallery.
 == Description ==
 
 = Blocks =
-SimpLy Gallery Blocks is a friendly, easy-to-use gallery plugin with a list of advanced options for creating responsive Image, Video, Audio galleries.
+SimpLy Gallery Blocks is a friendly, easy-to-use gallery plugin with advanced options for creating responsive image, video, and audio galleries in multiple layouts, including Slider / Carousel, Masonry, Justified, Grid, and more.
 
 = Albums =
-Combine multiple galleries into one collection and publish it. The gallery from the album will be added to the page using the AJAX request as needed, which will make your page even faster and at the same time as informative as possible.
+Combine multiple galleries into a single album with a dedicated splash page. Albums work as gallery collections, allowing you to group related galleries under one entry point.
+
+Each gallery inside an album is loaded dynamically via AJAX and opened in a modal view, so visitors can browse galleries directly from the album splash page without reloading the page, keeping navigation fast and seamless.
 
 = Lightbox Plugin =
 SimpLy Lightbox Plugin easily displays all linked images from a post or page in highly customizable lightbox. Compatible with native WordPress gallery (Block or Classic Editor). Each Post or Page can have a unique lightbox setting.
@@ -72,24 +73,22 @@ SimpLy Lightbox Plugin easily displays all linked images from a post or page in 
 * Social Sharing (Facebook, Twitter, Pinterest)
 * Smart Loading
 
-## Unrivaled, in every way ##
-The first of its kind, [SimpLy Gallery Blocks](https://simplygallery.co/) offers an unrivaled drag and drop gallery building experience in Gutenberg. Add your images, video or audio files in your choice of photo gallery block, customize display settings, hit publish.
+## Flexible gallery building ##
+Mixed Media Gallery Blocks provides a flexible gallery building experience for images, video, and audio. Add media items to your gallery, adjust display settings, and publish galleries using different layouts depending on your content needs.
 
-## Unparalleled capabilities ##
-An innovative transform system lets you instantly change your galleries into another form. Go from a fullscreen Masonry gallery to universal Grid or stylish Justified gallery, with just a single click. You won't find another Gutenberg gallery plugin with this kind of capability. Guaranteed.
+## Transformable gallery layouts ##
+Galleries can be transformed between different layouts such as Masonry, Grid, Justified, and fullscreen views. This allows you to reuse the same gallery content while changing its visual presentation without rebuilding it.
 
-## Highly responsive ##
-Our Gutenberg gallery blocks are second-to-none, featuring fullscale responsive support. And with fine controls for mobile and desktop styles, you can set custom styling for each gallery.
+## Responsive by design ##
+Gallery layouts are responsive by default and adapt to different screen sizes. Separate styling controls for desktop and mobile help ensure galleries remain usable and visually consistent across devices.
 
-## Next gen Lightbox ##
-Built on top of the latest technologies, SimpLy Lightbox is multi-gestures compatible, smooth and performant! Easily navigate with one or several fingers on your smartphone. Swipe, drag and pinch content naturally like with a native mobile swipeable view. It also supports navigation with keyboard or mouse wheel to slide or zoom.
+## Lightbox experience ##
+The built-in lightbox supports touch gestures, keyboard navigation, and mouse wheel controls. Users can navigate, zoom, and interact with gallery items on both desktop and mobile devices.
 
-Our lightbox mimics the most populars UIs like IOS, Android, Google Drive, etc… With a well known UI, users will instantly understand how to use the lightbox, and will easily navigate through your galleries.
+The lightbox interface is designed to be familiar and intuitive, making it easy for visitors to browse media content without leaving the page.
 
-SimpLy Lightbox is the only one lightbox to gather all these possibilities and You can use it absolutely for free without buying any addons or premium versions of the plugin.
-
-## A Super-fast experience ##
-We've built a highly interactive and intuitive experience with a focus on speed and ease of use. Drag. Drop. Transform. Style.
+## Performance-focused ##
+The plugin is designed with performance in mind, using dynamic loading and optimized rendering to keep galleries responsive and pages lightweight.
 
 ## A short demo of SimpLy Gallery Blocks ##
 In this video you will see how easily you can create photo gallery using SGB Gutenberg photo gallery block.
@@ -126,12 +125,31 @@ Please note that you easily convert block gallery from Masonry to Justified or t
 Yes! SimpLy Gallery Blocks's core features are absolutely free.
 
 == Changelog ==
+= 3.3.2.1 =
+* Security update: video poster generation is now restricted to users with the upload_files capability, ensuring that only users allowed to upload media can create poster images and preventing unauthorized use of this functionality.
+
+= 3.3.2 =
+*	Added Media Indexing settings to control how gallery media is exposed to search engines.
+Disabling static HTML output helps prevent gallery images from being indexed or included in XML sitemaps in most cases, while galleries continue to render via JavaScript.
+
+= 3.3.1 =
+* Fixed: XSS vulnerability (The ability for Contributors to create galleries has been disabled.)
+
+= 3.3.0 =
+* Updated: Internal improvements
+* Tweak: Updated Freemius SDK (2.13.0)
+
+= 3.2.8 =
+* Added: the ability to attach a link to a VideoPress-hosted video to an image.
+* Updated: Internal improvements
+* Tweak: Updated Freemius SDK (2.12.2)
+
 = 3.2.7 =
 * Updated: Internal improvements
 * Tweak: Updated Freemius SDK (2.12.1)
 
 = 3.2.6 =
-* Fixed: Custom CCC XSS Vulnerability Fixed. Field now has more restrictions. 
+* Fixed: Custom CSS XSS Vulnerability Fixed. Field now has more restrictions. 
 
 = 3.2.5 =
 * Added: Autoplay option for slideshow in Lightbox (Slideshow Autostart)

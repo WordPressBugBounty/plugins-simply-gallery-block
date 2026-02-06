@@ -3,10 +3,10 @@
 /**
  * Plugin Name: SimpLy Gallery Block & Lightbox
  * Plugin URI: https://simplygallery.co/
- * Description: The highly customizable Lightbox for native WordPress Gallery/Image. And beautiful gallery blocks with advanced Lightbox for photographers, video creators, writers and content marketers. This blocks set will help you create responsive Images, Video, Audio gallery. Three desired layout in one plugin - Masonry, Justified and Grid.
+ * Description: Simply Gallery is a mixed media gallery plugin that lets you combine images, video, and audio in a single gallery. Supports HTML5 video, YouTube, Vimeo, and VideoPress, and adds a customizable lightbox to native WordPress galleries.
  * Author: GalleryCreator
  * Author URI: https://blockslib.com/
- * Version: 3.2.7
+ * Version: 3.3.2.1
  * Text Domain: simply-gallery-block
  * Domain Path: /languages
  * License: GPL2+
@@ -23,12 +23,14 @@ if ( !defined( 'ABSPATH' ) ) {
 if ( function_exists( 'pgc_sgb_fs' ) ) {
     pgc_sgb_fs()->set_basename( false, __FILE__ );
 } else {
-    define( 'PGC_SGB_VERSION', '3.2.7' );
+    define( 'PGC_SGB_VERSION', '3.3.2.1' );
     define( 'PGC_SGB_SLUG', 'simply-gallery-block' );
     define( 'PGC_SGB_BLOCK_PREF', 'wp-block-pgcsimplygalleryblock-' );
     define( 'PGC_SGB_PLUGIN_SLUG', 'pgc-simply-gallery-plugin' );
     define( 'PGC_SGB_POST_TYPE', 'pgc_simply_gallery' );
     define( 'PGC_SGB_TAXONOMY', 'pgc_simply_category' );
+    define( 'PGC_SGB_TAGS', 'pgc_simply_tags' );
+    define( 'PGC_SGB_PRESET', 'pgc_simply_preset' );
     define( 'PGC_SGB_FILE', __FILE__ );
     define( 'PGC_SGB_PATH', __DIR__ );
     define( 'PGC_SGB_DIRNAME', basename( PGC_SGB_PATH ) );
@@ -83,6 +85,71 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
     }
 
     add_action( 'plugins_loaded', 'pgc_sgb_load_textdomain' );
+    function pgc_sgb_create_preset(  $preset_slug, $preset_data = ''  ) {
+        $preset_title = str_replace( 'pgc_sgb_', '', $preset_slug );
+        $post_id = wp_insert_post( array(
+            'post_type'   => PGC_SGB_PRESET,
+            'post_status' => 'publish',
+            'post_title'  => ucfirst( $preset_title ) . ' Preset',
+        ) );
+        if ( $post_id && !is_wp_error( $post_id ) ) {
+            update_post_meta( $post_id, '_pgc_preset_slug', $preset_slug );
+            update_post_meta( $post_id, '_pgc_preset_data', $preset_data );
+        }
+        return $post_id;
+    }
+
+    function pgc_sgb_migrate_presets() {
+        $skins_folders = glob( realpath( dirname( __FILE__ ) ) . '/blocks/skins/*.js' );
+        $presets_to_migrate = array(
+            'lightbox' => 'pgc_sgb_lightbox',
+        );
+        foreach ( $skins_folders as $file ) {
+            $fileName = substr( $file, strrpos( $file, "/" ) + 1 );
+            $skinSlug = substr( $fileName, 0, -3 );
+            $preset_title = str_replace( 'pgc_sgb_', '', $skinSlug );
+            $presets_to_migrate[$preset_title] = $skinSlug;
+        }
+        foreach ( $presets_to_migrate as $preset_slug => $option_key ) {
+            $preset_data = get_option( $option_key );
+            if ( !$preset_data ) {
+                continue;
+            }
+            pgc_sgb_create_preset( $option_key, $preset_data );
+        }
+    }
+
+    function pgc_sgb_get_preset_by_slug(  $slug, $get_preset_id = false  ) {
+        $posts = get_posts( [
+            'post_type'   => PGC_SGB_PRESET,
+            'meta_key'    => '_pgc_preset_slug',
+            'meta_value'  => $slug,
+            'numberposts' => 1,
+            'fields'      => 'ids',
+        ] );
+        if ( empty( $posts ) ) {
+            return null;
+        }
+        $preset_id = $posts[0];
+        if ( $get_preset_id ) {
+            return $preset_id;
+        }
+        $data = get_post_meta( $preset_id, '_pgc_preset_data', true );
+        return $data;
+    }
+
+    function pgc_sgb_update_preset(  $slug, $preset_data  ) {
+        $preset_id = pgc_sgb_get_preset_by_slug( $slug, true );
+        if ( !$preset_id ) {
+            $preset_id = pgc_sgb_create_preset( $slug, $preset_data );
+            if ( $preset_id && !is_wp_error( $preset_id ) ) {
+                return true;
+            }
+            return false;
+        }
+        return update_post_meta( $preset_id, '_pgc_preset_data', $preset_data );
+    }
+
     function pgc_sgb_getGlobalPresets() {
         global $pgc_sgb_skins_list, $pgc_sgb_skins_presets;
         $skins_folders = glob( realpath( dirname( __FILE__ ) ) . '/blocks/skins/*.js' );
@@ -90,7 +157,7 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
             $fileName = substr( $file, strrpos( $file, "/" ) + 1 );
             $skinSlug = substr( $fileName, 0, -3 );
             $pgc_sgb_skins_list[$skinSlug] = PGC_SGB_URL . 'blocks/skins/' . $fileName . '?ver=' . PGC_SGB_VERSION;
-            $pgc_sgb_skins_presets[$skinSlug] = get_option( $skinSlug );
+            $pgc_sgb_skins_presets[$skinSlug] = pgc_sgb_get_preset_by_slug( $skinSlug );
         }
     }
 
@@ -252,6 +319,11 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
             PGC_SGB_VERSION,
             true
         );
+        if ( is_array( $pgc_sgb_skins_list ) ) {
+            foreach ( $pgc_sgb_skins_list as $skin_key => $skin_url ) {
+                $pgc_sgb_skins_list[$skin_key] = esc_url_raw( (string) $skin_url );
+            }
+        }
         $globalJS = array(
             'assets'        => PGC_SGB_URL . 'assets/',
             'skinsFolder'   => PGC_SGB_URL . 'blocks/skins/',
@@ -264,46 +336,70 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
     }
 
     add_action( 'wp_enqueue_scripts', 'pgc_sgb_menager_script' );
-    function pgc_sgb_update_tags_list(  $tagsArr, $delete = NULL  ) {
-        $tagsListString = get_option( 'pgc_sgb_tags_list' );
-        if ( $tagsListString ) {
-            $tagsList = explode( ",", $tagsListString );
-        }
-        $tagsString = '';
-        if ( $tagsList && !empty( $tagsList ) ) {
-            foreach ( $tagsArr as $value ) {
-                if ( is_null( $delete ) ) {
-                    if ( array_search( $value, $tagsList ) === false ) {
-                        $tagsString = $tagsString . ',' . $value;
-                    }
-                } else {
-                    if ( ($key = array_search( $value, $tagsList )) !== false ) {
-                        unset($tagsList[$key]);
-                        //$tagsString = $tagsString . ',' . $value;
-                    }
+    function pgc_sgb_tags_migrate() {
+        /** Tags to Terms 3.3.1 */
+        $old_tags = get_option( 'pgc_sgb_tags_list' );
+        if ( !empty( $old_tags ) ) {
+            $tagsList = array_filter( array_map( 'trim', explode( ',', $old_tags ) ) );
+            foreach ( $tagsList as $tag ) {
+                $tag = sanitize_text_field( $tag );
+                if ( $tag === '' ) {
+                    continue;
+                }
+                if ( !term_exists( $tag, PGC_SGB_TAGS ) ) {
+                    wp_insert_term( $tag, PGC_SGB_TAGS );
                 }
             }
+        }
+        //delete_option('pgc_sgb_tags_list');
+    }
+
+    function pgc_sgb_get_tags_list() {
+        $terms = get_terms( array(
+            'taxonomy'   => PGC_SGB_TAGS,
+            'hide_empty' => false,
+            'orderby'    => 'name',
+            'order'      => 'ASC',
+        ) );
+        if ( empty( $terms ) || is_wp_error( $terms ) ) {
+            return '';
+        }
+        $names = wp_list_pluck( $terms, 'name' );
+        return implode( ',', $names );
+    }
+
+    function pgc_sgb_update_tags_list(  $tagsArr, $delete = NULL  ) {
+        if ( is_string( $tagsArr ) ) {
+            $inputTags = array_filter( array_map( 'trim', explode( ',', $tagsArr ) ) );
+        } elseif ( is_array( $tagsArr ) ) {
+            $inputTags = array_filter( array_map( 'trim', $tagsArr ) );
+        } else {
+            return pgc_sgb_get_tags_list();
+        }
+        $deleted = array();
+        foreach ( $inputTags as $tag ) {
+            $tag = sanitize_text_field( $tag );
+            if ( $tag === '' ) {
+                continue;
+            }
             if ( is_null( $delete ) ) {
-                if ( $tagsString !== '' ) {
-                    $tagsString = $tagsListString . $tagsString;
-                } else {
-                    $tagsString = $tagsListString;
+                if ( !term_exists( $tag, PGC_SGB_TAGS ) ) {
+                    wp_insert_term( $tag, PGC_SGB_TAGS );
                 }
             } else {
-                $tagsString = implode( ",", $tagsList );
-            }
-        } else {
-            if ( is_null( $delete ) ) {
-                $tagsString = implode( ",", $tagsArr );
+                $term = term_exists( $tag, PGC_SGB_TAGS );
+                if ( $term && !is_wp_error( $term ) ) {
+                    wp_delete_term( $term['term_id'], PGC_SGB_TAGS );
+                    $deleted[] = $tag;
+                }
             }
         }
         $res = array();
         if ( !is_null( $delete ) ) {
             $res['delete'] = true;
         }
-        $tagsString = sanitize_text_field( $tagsString );
+        $tagsString = pgc_sgb_get_tags_list();
         $res['tagsList'] = $tagsString;
-        $res['status'] = update_option( 'pgc_sgb_tags_list', $tagsString );
         return $res;
     }
 
@@ -325,8 +421,49 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
         return false;
     }
 
+    function pgc_sgb_run_migrations() {
+        $installed_version = get_option( 'pgc_sgb_version' );
+        if ( !$installed_version ) {
+            pgc_sgb_tags_migrate();
+            pgc_sgb_migrate_presets();
+            update_option( 'pgc_sgb_version', PGC_SGB_VERSION );
+            return;
+        }
+        if ( $installed_version !== PGC_SGB_VERSION ) {
+            if ( version_compare( $installed_version, '3.3.1', '<' ) ) {
+                pgc_sgb_tags_migrate();
+                pgc_sgb_migrate_presets();
+            }
+            update_option( 'pgc_sgb_version', PGC_SGB_VERSION );
+        }
+    }
+
+    function pgc_sgb_init() {
+        register_taxonomy( PGC_SGB_TAGS, array('post'), array(
+            'label'        => __( 'SimpLy Tags', 'simply-gallery-block' ),
+            'public'       => false,
+            'show_ui'      => false,
+            'hierarchical' => false,
+            'capabilities' => array(
+                'manage_terms' => 'edit_posts',
+                'edit_terms'   => 'edit_posts',
+                'delete_terms' => 'edit_posts',
+                'assign_terms' => 'edit_posts',
+            ),
+        ) );
+        register_post_type( PGC_SGB_PRESET, array(
+            'label'           => 'Simply Gallery Preset',
+            'public'          => false,
+            'show_ui'         => false,
+            'capability_type' => 'post',
+            'supports'        => array('title'),
+        ) );
+        pgc_sgb_run_migrations();
+    }
+
+    add_action( 'init', 'pgc_sgb_init' );
     function pgc_sgb_action_wizard() {
-        global $post, $pgc_sgb_wc_to_sgb;
+        global $post, $pgc_sgb_wc_to_sgb, $pgc_sgb_skins_list;
         check_ajax_referer( 'pgc-sgb-nonce', 'nonce' );
         $json = array();
         $out = array();
@@ -338,27 +475,59 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
         }
         switch ( $json['type'] ) {
             case 'create_post_thumbnail':
-                if ( current_user_can( 'add_post_meta', intval( $json['postId'] ) ) ) {
-                    $videoName = sanitize_text_field( wp_unslash( $json['name'] ) );
+                $post_id = ( isset( $json['postId'] ) ? absint( $json['postId'] ) : 0 );
+                if ( $post_id && current_user_can( 'add_post_meta', $post_id ) && current_user_can( 'edit_post', $post_id ) && current_user_can( 'upload_files' ) ) {
+                    $videoName_raw = ( isset( $json['name'] ) ? wp_unslash( $json['name'] ) : '' );
+                    // Force a safe, traversal-free filename (no slashes, no dot-dot segments).
+                    $poster_base = sanitize_file_name( $videoName_raw . '_poster.jpg' );
+                    $poster_base = wp_basename( $poster_base );
+                    if ( $poster_base === '' || $poster_base === '.' || $poster_base === '..' ) {
+                        $poster_base = 'poster.jpg';
+                    }
+                    $uploadsDir = wp_upload_dir();
+                    $poster_tmp_dir = trailingslashit( $uploadsDir['path'] ) . 'poster_tmp/';
+                    wp_mkdir_p( $poster_tmp_dir );
+                    // Ensure unique filename in tmp dir.
+                    $poster_filename = wp_unique_filename( $poster_tmp_dir, $poster_base );
+                    $tmpPosterPath = $poster_tmp_dir . $poster_filename;
                     if ( isset( $_POST['thumb_raw_data'] ) ) {
                         $imgData = wp_unslash( $_POST['thumb_raw_data'] );
                     }
                     if ( isset( $imgData ) ) {
-                        $uploadsDir = wp_upload_dir();
-                        $posterName = $videoName . '_poster';
-                        wp_mkdir_p( $uploadsDir['path'] . '/poster_tmp' );
-                        $tmpPosterPath = $uploadsDir['path'] . '/poster_tmp/' . $posterName . '.jpg';
-                        $raw_png = str_replace( 'data:image/png;base64,', '', $imgData );
-                        $raw_png = str_replace( 'data:image/jpeg;base64,', '', $imgData );
-                        $raw_png = str_replace( ' ', '+', $raw_png );
-                        $decoded_png = base64_decode( $raw_png );
+                        // Strictly parse data URI, only allow PNG/JPEG.
+                        $imgData = trim( (string) $imgData );
+                        if ( !preg_match( '~^data:(image/(png|jpeg));base64,(.*)$~s', $imgData, $m ) ) {
+                            $out['message']['poster'] = 'false';
+                            $out['message']['error'] = 'Error: Unsupported image format';
+                            break;
+                        }
+                        $raw_b64 = str_replace( ' ', '+', $m[3] );
+                        $decoded_png = base64_decode( $raw_b64, true );
+                        // Basic size and content validation to avoid abuse.
+                        if ( $decoded_png === false ) {
+                            $out['message']['poster'] = 'false';
+                            $out['message']['error'] = 'Error: Invalid base64 data';
+                            break;
+                        }
+                        $max_bytes = (int) apply_filters( 'pgc_sgb_max_thumbnail_bytes', 5 * 1024 * 1024, $post_id );
+                        if ( strlen( $decoded_png ) > $max_bytes ) {
+                            $out['message']['poster'] = 'false';
+                            $out['message']['error'] = 'Error: Image too large';
+                            break;
+                        }
+                        $img_info = @getimagesizefromstring( $decoded_png );
+                        if ( empty( $img_info ) || empty( $img_info['mime'] ) || $img_info['mime'] !== $m[1] || !in_array( $img_info['mime'], array('image/jpeg', 'image/png'), true ) ) {
+                            $out['message']['poster'] = 'false';
+                            $out['message']['error'] = 'Error: Invalid image';
+                            break;
+                        }
                         if ( pgc_sgb_can_write_direct( dirname( $tmpPosterPath ) ) ) {
                             global $wp_filesystem;
                             $success = $wp_filesystem->put_contents( $tmpPosterPath, $decoded_png );
                             if ( $success ) {
                                 $file = array(
-                                    'name'     => $posterName . '.jpg',
-                                    'type'     => mime_content_type( $tmpPosterPath ),
+                                    'name'     => $poster_filename,
+                                    'type'     => $img_info['mime'],
                                     'tmp_name' => $tmpPosterPath,
                                     'size'     => filesize( $tmpPosterPath ),
                                 );
@@ -387,7 +556,7 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
                                         $out['message']['metaData'] = $meta_data;
                                         $out['message']['sideload'] = $sideload;
                                         $out['message']['posterId'] = $attachment_id;
-                                        $out['message']['poster'] = set_post_thumbnail( intval( $json['postId'] ), $attachment_id );
+                                        $out['message']['poster'] = set_post_thumbnail( $post_id, $attachment_id );
                                     }
                                 }
                             } else {
@@ -402,18 +571,27 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
                 }
                 break;
             case 'update_post_thumbnail':
-                if ( current_user_can( 'add_post_meta', intval( $json['postId'] ) ) ) {
+                $post_id = ( isset( $json['postId'] ) ? absint( $json['postId'] ) : 0 );
+                if ( $post_id && current_user_can( 'add_post_meta', $post_id ) ) {
                     if ( intval( $json['value'] ) === 0 ) {
-                        $out['message'][$json['key']] = delete_post_thumbnail( intval( $json['postId'] ) );
+                        $out['message'][$json['key']] = delete_post_thumbnail( $post_id );
                     } else {
-                        $out['message'][$json['key']] = set_post_thumbnail( intval( $json['postId'] ), intval( $json['value'] ) );
+                        $out['message'][$json['key']] = set_post_thumbnail( $post_id, intval( $json['value'] ) );
                     }
                 }
                 break;
             case 'update_post_meta':
-                if ( current_user_can( 'add_post_meta', intval( $json['postId'] ) ) ) {
-                    $out['message'][$json['key']] = update_post_meta( $json['postId'], $json['key'], sanitize_text_field( $json['value'] ) );
-                    $out['message']['test'] = sanitize_text_field( $json['value'] );
+                $post_id = ( isset( $json['postId'] ) ? absint( $json['postId'] ) : 0 );
+                $key_raw = ( isset( $json['key'] ) ? (string) $json['key'] : '' );
+                $value_raw = ( isset( $json['value'] ) ? $json['value'] : '' );
+                if ( $post_id && current_user_can( 'edit_post', $post_id ) && current_user_can( 'add_post_meta', $post_id ) ) {
+                    // Only allow plugin-owned meta keys.
+                    $key = sanitize_key( $key_raw );
+                    if ( strpos( $key, 'pgc_sgb_' ) === 0 ) {
+                        $out['message'][$key] = update_post_meta( $post_id, $key, sanitize_text_field( $value_raw ) );
+                    } else {
+                        $out['message']['error'] = 'Error: Invalid meta key';
+                    }
                 }
                 break;
             case 'add_posts_meta':
@@ -590,19 +768,31 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
                 }
                 break;
             case 'update_option':
-                if ( current_user_can( 'edit_posts' ) ) {
-                    foreach ( $json['options'] as $key => $value ) {
-                        if ( strpos( $key, 'pgc_sgb' ) === 0 ) {
-                            $out['message'][$key] = update_option( $key, $value );
+                foreach ( $json['options'] as $key => $value ) {
+                    if ( strpos( $key, 'pgc_sgb' ) === 0 ) {
+                        if ( isset( $pgc_sgb_skins_list[$key] ) ) {
+                            $out['message'][$key] = pgc_sgb_update_preset( $key, $value );
+                        } elseif ( $key === 'pgc_sgb_lightbox' ) {
+                            $out['message'][$key] = pgc_sgb_update_preset( $key, $value );
+                        } else {
+                            if ( current_user_can( 'manage_options' ) ) {
+                                $out['message'][$key] = update_option( $key, $value );
+                            }
                         }
                     }
                 }
                 break;
             case 'get_option':
-                if ( current_user_can( 'edit_posts' ) ) {
-                    foreach ( $json['options'] as $key => $value ) {
-                        if ( strpos( $key, 'pgc_sgb' ) === 0 ) {
-                            $out['message'][$key] = get_option( $key );
+                foreach ( $json['options'] as $key => $value ) {
+                    if ( strpos( $key, 'pgc_sgb' ) === 0 ) {
+                        if ( $key === 'pgc_sgb_tags_list' ) {
+                            $out['message'][$key] = pgc_sgb_get_tags_list();
+                        } elseif ( isset( $pgc_sgb_skins_list[$key] ) ) {
+                            $out['message'][$key] = pgc_sgb_get_preset_by_slug( $key );
+                        } else {
+                            if ( current_user_can( 'manage_options' ) ) {
+                                $out['message'][$key] = get_option( $key );
+                            }
                         }
                     }
                 }

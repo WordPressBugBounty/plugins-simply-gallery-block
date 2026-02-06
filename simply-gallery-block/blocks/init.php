@@ -122,7 +122,17 @@ function pgc_sgb_render_callback(  $atr, $content  ) {
         $minHeight = ( isset( $atr['sliderMaxHeight'] ) ? esc_attr( $atr['sliderMaxHeight'] ) : 400 );
         $style = ' style="min-height:' . $minHeight . 'px"';
     }
-    $noscript = '<div class="simply-gallery-amp pgc_sgb_slider ' . esc_attr( $align ) . '" style="display: none;"><div class="sgb-gallery">' . pgc_sgb_noscript( $atr['images'] ) . '</div></div>';
+    $is_indexing = !array_key_exists( 'isIndexing', $atr ) || filter_var( $atr['isIndexing'], FILTER_VALIDATE_BOOLEAN );
+    $is_noscript = !array_key_exists( 'isNoScript', $atr ) || filter_var( $atr['isNoScript'], FILTER_VALIDATE_BOOLEAN );
+    $noscript = '';
+    if ( $is_indexing ) {
+        $html = pgc_sgb_noscript( $atr['images'] );
+        if ( $is_noscript ) {
+            $noscript = sprintf( '<div class="simply-gallery-amp pgc_sgb_slider %s"><noscript><div class="sgb-gallery">%s</div></noscript></div>', esc_attr( $align ), $html );
+        } else {
+            $noscript = sprintf( '<div class="simply-gallery-amp pgc_sgb_slider %s" style="display: none;"><div class="sgb-gallery">%s</div></div>', esc_attr( $align ), $html );
+        }
+    }
     $preloaderColor = ( isset( $galleryDataArr['galleryPreloaderColor'] ) ? $galleryDataArr['galleryPreloaderColor'] : '#d4d4d4' );
     $preloder = '<div class="sgb-preloader" id="pr_' . esc_attr( $atr['galleryId'] ) . '">
 	<div class="sgb-square" style="background:' . esc_attr( $preloaderColor ) . '"></div>
@@ -262,6 +272,8 @@ function pgc_sgb_block_assets() {
         PGC_SGB_VERSION
     );
     register_block_type( 'pgcsimplygalleryblock/masonry', array(
+        'api_version'     => 3,
+        'title'           => 'SimpLy Masonry',
         'style'           => PGC_SGB_SLUG . '-frontend',
         'editor_script'   => PGC_SGB_SLUG . '-js',
         'editor_style'    => PGC_SGB_SLUG . '-masonry',
@@ -275,6 +287,8 @@ function pgc_sgb_block_assets() {
         PGC_SGB_VERSION
     );
     register_block_type( 'pgcsimplygalleryblock/justified', array(
+        'api_version'     => 3,
+        'title'           => 'SimpLy Justified',
         'style'           => PGC_SGB_SLUG . '-frontend',
         'editor_script'   => PGC_SGB_SLUG . '-js',
         'editor_style'    => PGC_SGB_SLUG . '-justified',
@@ -288,6 +302,8 @@ function pgc_sgb_block_assets() {
         PGC_SGB_VERSION
     );
     register_block_type( 'pgcsimplygalleryblock/grid', array(
+        'api_version'     => 3,
+        'title'           => 'SimpLy Grid',
         'style'           => PGC_SGB_SLUG . '-frontend',
         'editor_script'   => PGC_SGB_SLUG . '-js',
         'editor_style'    => PGC_SGB_SLUG . '-grid',
@@ -301,6 +317,8 @@ function pgc_sgb_block_assets() {
         PGC_SGB_VERSION
     );
     register_block_type( 'pgcsimplygalleryblock/slider', array(
+        'api_version'     => 3,
+        'title'           => 'SimpLy Slider',
         'style'           => PGC_SGB_SLUG . '-frontend',
         'editor_script'   => PGC_SGB_SLUG . '-js',
         'editor_style'    => PGC_SGB_SLUG . '-slider',
@@ -314,6 +332,8 @@ function pgc_sgb_block_assets() {
         PGC_SGB_VERSION
     );
     register_block_type( 'pgcsimplygalleryblock/viewer', array(
+        'api_version'     => 3,
+        'title'           => 'SimpLy Viewer',
         'style'           => PGC_SGB_SLUG . '-frontend',
         'editor_script'   => PGC_SGB_SLUG . '-js',
         'editor_style'    => PGC_SGB_SLUG . '-viewer',
