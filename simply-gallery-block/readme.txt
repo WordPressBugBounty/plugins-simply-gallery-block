@@ -2,11 +2,11 @@
 Author URI: https://blockslib.com/
 Plugin URI: https://simplygallery.co
 Contributors: gallerycreator
-Tags: media gallery, mixed media, video gallery, lightbox, gallery blocks
+Tags: media gallery, audio gallery, video gallery, lightbox, album
 Requires at least: 6.6
 Tested up to: 6.9
 Requires PHP: 5.3.8
-Stable tag: 3.3.2.1
+Stable tag: 3.3.2.2
 License: GPL-2.0
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -125,6 +125,9 @@ Please note that you easily convert block gallery from Masonry to Justified or t
 Yes! SimpLy Gallery Blocks's core features are absolutely free.
 
 == Changelog ==
+= 3.3.2.2 =
+* Security improvement: Hardened input validation and output escaping for Album-related blocks/shortcodes and related REST endpoints to prevent unsafe attributes from being saved or rendered.
+
 = 3.3.2.1 =
 * Security update: video poster generation is now restricted to users with the upload_files capability, ensuring that only users allowed to upload media can create poster images and preventing unauthorized use of this functionality.
 

@@ -6,7 +6,7 @@
  * Description: Simply Gallery is a mixed media gallery plugin that lets you combine images, video, and audio in a single gallery. Supports HTML5 video, YouTube, Vimeo, and VideoPress, and adds a customizable lightbox to native WordPress galleries.
  * Author: GalleryCreator
  * Author URI: https://blockslib.com/
- * Version: 3.3.2.1
+ * Version: 3.3.2.2
  * Text Domain: simply-gallery-block
  * Domain Path: /languages
  * License: GPL2+
@@ -23,7 +23,7 @@ if ( !defined( 'ABSPATH' ) ) {
 if ( function_exists( 'pgc_sgb_fs' ) ) {
     pgc_sgb_fs()->set_basename( false, __FILE__ );
 } else {
-    define( 'PGC_SGB_VERSION', '3.3.2.1' );
+    define( 'PGC_SGB_VERSION', '3.3.2.2' );
     define( 'PGC_SGB_SLUG', 'simply-gallery-block' );
     define( 'PGC_SGB_BLOCK_PREF', 'wp-block-pgcsimplygalleryblock-' );
     define( 'PGC_SGB_PLUGIN_SLUG', 'pgc-simply-gallery-plugin' );
@@ -46,23 +46,24 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
                 // Include Freemius SDK.
                 require_once dirname( __FILE__ ) . '/freemius/start.php';
                 $pgc_sgb_fs = fs_dynamic_init( array(
-                    'id'             => '7208',
-                    'slug'           => 'simply-gallery-block',
-                    'type'           => 'plugin',
-                    'public_key'     => 'pk_0e7076e3ce718684690406736d9be',
-                    'is_premium'     => false,
-                    'premium_suffix' => 'Pro',
-                    'has_addons'     => false,
-                    'has_paid_plans' => true,
-                    'trial'          => array(
+                    'id'               => '7208',
+                    'slug'             => 'simply-gallery-block',
+                    'type'             => 'plugin',
+                    'public_key'       => 'pk_0e7076e3ce718684690406736d9be',
+                    'is_premium'       => false,
+                    'premium_suffix'   => 'Pro',
+                    'has_addons'       => false,
+                    'has_paid_plans'   => true,
+                    'trial'            => array(
                         'days'               => 7,
                         'is_require_payment' => true,
                     ),
-                    'menu'           => array(
+                    'menu'             => array(
                         'slug'       => 'edit.php?post_type=pgc_simply_gallery',
                         'first-path' => 'edit.php?post_type=pgc_simply_gallery&page=pgc-simply-welcome',
                     ),
-                    'is_live'        => true,
+                    'is_live'          => true,
+                    'is_org_compliant' => true,
                 ) );
             }
             return $pgc_sgb_fs;

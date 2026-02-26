@@ -4,21 +4,29 @@ if (!defined('ABSPATH')) {
 }
 function pgc_sgb_shortcode_render($atts, $content = null)
 {
-	if (!is_array($atts) && !isset($atts['id'])) {
+	if (!is_array($atts) || (empty($atts['id']) && empty($atts['slug']))) {
 		return '';
 	}
+
+	$postData = '';
+	$postStatus = '';
+
 	if (!empty($atts['id'])) {
-		$post_id = intval($atts['id']);
+		$post_id = absint($atts['id']);
+		if ($post_id <= 0) {
+			return '';
+		}
 		$postData = get_post_field('post_content', $post_id, 'raw');
 		$postStatus = get_post_field('post_status', $post_id, 'attribute');
 	} elseif (!empty($atts['slug'])) {
-		$post_slug = $atts['slug'];
+		$post_slug = sanitize_title((string) $atts['slug']);
 		$post = get_page_by_path($post_slug, ARRAY_A, PGC_SGB_POST_TYPE);
-		if (isset($post)) {
-			$postData = $post['post_content'];
-			$postStatus = $post['post_status'];
+		if (is_array($post) && !empty($post)) {
+			$postData = isset($post['post_content']) ? $post['post_content'] : '';
+			$postStatus = isset($post['post_status']) ? $post['post_status'] : '';
 		} else {
 			$postData = '';
+			$postStatus = '';
 		}
 	}
 	if ($postStatus === '' || is_wp_error($postStatus) || $postStatus !== 'publish') return '';
@@ -30,7 +38,7 @@ function pgc_sgb_shortcode_render($atts, $content = null)
 		$output .= render_block($block);
 	}
 	$priority = has_filter('the_content', 'wpautop');
-	if (false !== $priority && doing_filter('the_content') && has_blocks($content)) {
+	if (false !== $priority && doing_filter('the_content') && is_string($content) && has_blocks($content)) {
 		remove_filter('the_content', 'wpautop', $priority);
 		add_filter('the_content', '_restore_wpautop_hook', $priority + 1);
 	}
@@ -39,7 +47,12 @@ function pgc_sgb_shortcode_render($atts, $content = null)
 function pgc_sgb_shortcode_album_render($atts, $content = null)
 {
 	global $pgc_sgb_skins_list, $pgc_sgb_skins_presets;
-	if (!is_array($atts) && !isset($atts['id'])) {
+	if (!is_array($atts) || empty($atts['id'])) {
+		return '';
+	}
+
+	$album_id = absint($atts['id']);
+	if ($album_id <= 0) {
 		return '';
 	}
 	$galleryAtr = array();
@@ -61,8 +74,8 @@ function pgc_sgb_shortcode_album_render($atts, $content = null)
 			}
 		}
 	}
-	$galleryAtr['taxonomyId'] = $atts['id'];
-	$galleryAtr['galleryId'] = 'album_' . $atts['id'];
+	$galleryAtr['taxonomyId'] = $album_id;
+	$galleryAtr['galleryId'] = 'album_' . $album_id;
 	return pgc_sgb_render_albums_blocks_callback($galleryAtr, null);
 }
 /** SimpLy Galleries Block */
@@ -150,8 +163,19 @@ function pgc_sgb_render_albums_blocks_callback($atr, $content)
 		if (isset($content)) return $content;
 		return '';
 	}
-	$skinType = $atr['skin'];
-	$termId = $atr['taxonomyId'];
+	$skinType = sanitize_key($atr['skin']);
+	$termId = isset($atr['taxonomyId']) ? absint($atr['taxonomyId']) : 0;
+
+	// Normalize galleryId for safe use in HTML attributes (data-gallery-id) and element IDs.
+	$gallery_id_raw = isset($atr['galleryId']) ? (string) $atr['galleryId'] : '';
+	$gallery_id = preg_replace('/[^A-Za-z0-9_\-]/', '', $gallery_id_raw);
+	if ($gallery_id === '') {
+		if (isset($content)) {
+			return $content;
+		}
+		return '';
+	}
+
 	$orderby = isset($atr['orderBy']) ? $atr['orderBy'] : 'ID';
 	$order = isset($atr['order']) ? $atr['order'] : 'ASC';
 	$galleries = array();
@@ -194,31 +218,45 @@ function pgc_sgb_render_albums_blocks_callback($atr, $content)
 		}
 	} else {
 		return '<div class="pgc-sgb-cb" data-gallery-id="'
-			. esc_attr($atr['galleryId']) . '">'
+			. esc_attr($gallery_id) . '">'
 			. esc_html__('SimpLy Album EMPTY', 'simply-gallery-block') . '</div>';
 	}
 	$galleryData = isset($atrFromPreset) ? $atrFromPreset : $atr;
 	$align = '';
 	if (isset($atr['align'])) {
-		$align = $align . 'align' . $atr['align'];
+		$align_value = (string) $atr['align'];
+		if (in_array($align_value, array('left', 'right', 'center', 'wide', 'full'), true)) {
+			$align = 'align' . $align_value;
+		}
 	}
 	$className = PGC_SGB_BLOCK_PREF . $skinType . ' ' . $align;
 
 	if (isset($atr['className'])) {
-		$className = $className . ' ' . $atr['className'];
+		$extra_classes = preg_split('/\s+/', (string) $atr['className']);
+		$extra_classes = array_filter(array_map('sanitize_html_class', (array) $extra_classes));
+		if (!empty($extra_classes)) {
+			$className .= ' ' . implode(' ', $extra_classes);
+		}
 	}
 	$noscript = '<div class="simply-gallery-amp pgc-sgb-album ' . esc_attr($align) . '" style="display: none;"><div class="sgb-gallery">'
 		. pgc_sgb_noscript_covers($galleries)
 		. '</div></div>';
-	$preloaderColor = isset($galleryDataArr['galleryPreloaderColor']) ? $galleryDataArr['galleryPreloaderColor'] : '#d4d4d4';
-	$preloder = '<div class="sgb-preloader" id="pr_' . $atr['galleryId'] . '">
-	<div class="sgb-square" style="background:' . $preloaderColor . '"></div>
-	<div class="sgb-square" style="background:' . $preloaderColor . '"></div>
-	<div class="sgb-square" style="background:' . $preloaderColor . '"></div>
-	<div class="sgb-square" style="background:' . $preloaderColor . '"></div></div>';
-	$html = '<div class="pgc-sgb-cb ' . esc_attr($className)	. '" data-gallery-id="' . $atr['galleryId'] . '">'
+
+	$preloaderColor = '#d4d4d4';
+	if (isset($galleryData['galleryPreloaderColor'])) {
+		$maybe_color = sanitize_hex_color((string) $galleryData['galleryPreloaderColor']);
+		if (!empty($maybe_color)) {
+			$preloaderColor = $maybe_color;
+		}
+	}
+	$preloder = '<div class="sgb-preloader" id="pr_' . esc_attr($gallery_id) . '">
+	<div class="sgb-square" style="background:' . esc_attr($preloaderColor) . '"></div>
+	<div class="sgb-square" style="background:' . esc_attr($preloaderColor) . '"></div>
+	<div class="sgb-square" style="background:' . esc_attr($preloaderColor) . '"></div>
+	<div class="sgb-square" style="background:' . esc_attr($preloaderColor) . '"></div></div>';
+	$html = '<div class="pgc-sgb-cb ' . esc_attr($className)	. '" data-gallery-id="' . esc_attr($gallery_id) . '">'
 		. $preloder . $noscript
-		. '<script type="application/json" class="sgb-data">' . wp_json_encode($galleryData) . '</script>'
+		. '<script type="application/json" class="sgb-data">' . wp_json_encode($galleryData, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . '</script>'
 		. '<script type="text/javascript">(function(){if(window.PGC_SGB && window.PGC_SGB.searcher){window.PGC_SGB.searcher.initBlocks()}})()</script>'
 		. '</div>';
 	return $html;
@@ -632,14 +670,29 @@ function pgc_sgb_prepare_item_for_js($img_att_data)
 }
 function pgc_sgb_get_simply_album(WP_REST_Request $request)
 {
-	$termId = $request['id'];
-	$orderby = $request['orderby'];
-	$order = $request['order'];
+	$termId = absint($request['id']);
+	if ($termId <= 0) {
+		return array();
+	}
+
+	$orderby = isset($request['orderby']) ? (string) $request['orderby'] : 'ID';
+	if (!in_array($orderby, array('ID', 'title', 'modified', 'date'), true)) {
+		$orderby = 'ID';
+	}
+
+	$order = isset($request['order']) ? strtoupper((string) $request['order']) : 'ASC';
+	if (!in_array($order, array('ASC', 'DESC'), true)) {
+		$order = 'ASC';
+	}
+
 	return pgc_sgb_get_galleries($termId, $orderby, $order);
 }
 function pgc_sgb_get_gallery_atr(WP_REST_Request $request)
 {
-	$postId = $request['id'];
+	$postId = absint($request['id']);
+	if ($postId <= 0) {
+		return array();
+	}
 	if (
 		get_post_field('post_type', $postId, 'raw') === PGC_SGB_POST_TYPE
 		&& get_post_status($postId) !== 'publish'
@@ -672,7 +725,16 @@ function pgc_sgb_get_gallery_atr(WP_REST_Request $request)
 				$gallery['galleryTagsList'] = $attrs['galleryTagsList'];
 			}
 			if (isset($attrs['orderBy'])) {
-				$gallery['orderBy'] = $attrs['orderBy'];
+				$orderby = (string) $attrs['orderBy'];
+				if (in_array($orderby, array('ID', 'title', 'modified', 'date'), true)) {
+					$gallery['orderBy'] = $orderby;
+				}
+			}
+			if (isset($attrs['order'])) {
+				$order = strtoupper((string) $attrs['order']);
+				if (in_array($order, array('ASC', 'DESC'), true)) {
+					$gallery['order'] = $order;
+				}
 			}
 			if (function_exists('pgc_sgb_get_query_data') && isset($attrs['galleryQuery'])) {
 				$gallery['galleryQuery'] = $attrs['galleryQuery'];
@@ -695,11 +757,6 @@ function pgc_sgb_get_gallery_atr(WP_REST_Request $request)
 			}
 			array_push($output, $gallery);
 		}
-	}
-	$priority = has_filter('the_content', 'wpautop');
-	if (false !== $priority && doing_filter('the_content') && has_blocks($content)) {
-		remove_filter('the_content', 'wpautop', $priority);
-		add_filter('the_content', '_restore_wpautop_hook', $priority + 1);
 	}
 	return $output;
 }
