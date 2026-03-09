@@ -6,7 +6,7 @@ Tags: media gallery, audio gallery, video gallery, lightbox, album
 Requires at least: 6.6
 Tested up to: 6.9
 Requires PHP: 5.3.8
-Stable tag: 3.3.2.2
+Stable tag: 3.3.2.3
 License: GPL-2.0
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -125,6 +125,10 @@ Please note that you easily convert block gallery from Masonry to Justified or t
 Yes! SimpLy Gallery Blocks's core features are absolutely free.
 
 == Changelog ==
+= 3.3.2.3 =
+* Fixed: Mminor bug fixes.
+* Fixed: MLA Pickers.
+
 = 3.3.2.2 =
 * Security improvement: Hardened input validation and output escaping for Album-related blocks/shortcodes and related REST endpoints to prevent unsafe attributes from being saved or rendered.
 

@@ -213,22 +213,6 @@ function pgc_sgb_block_assets() {
                 return current_user_can( 'edit_posts' );
             },
         ) );
-        $globalJS = array(
-            'ajaxurl'       => admin_url( 'admin-ajax.php' ),
-            'adminurl'      => get_admin_url(),
-            'nonce'         => wp_create_nonce( 'pgc-sgb-nonce' ),
-            'assets'        => PGC_SGB_URL . 'assets/',
-            'postType'      => PGC_SGB_POST_TYPE,
-            'taxonomy'      => PGC_SGB_TAXONOMY,
-            'skinsFolder'   => PGC_SGB_URL . 'blocks/skins/',
-            'searcher'      => PGC_SGB_URL . 'blocks/pgc_sgb.min.js' . '?ver=' . PGC_SGB_VERSION,
-            'skinsList'     => $pgc_sgb_skins_list,
-            'wpApiRoot'     => esc_url_raw( rest_url() ),
-            'skinsSettings' => $pgc_sgb_skins_presets,
-            'admin'         => is_admin(),
-        );
-        wp_localize_script( PGC_SGB_SLUG . '-script', 'PGC_SGB_ADMIN', $globalJS );
-        wp_localize_script( PGC_SGB_SLUG . '-script', 'PGC_SGB', $globalJS );
     }
     /** Blocks Styles */
     wp_register_style(
@@ -341,6 +325,29 @@ function pgc_sgb_block_assets() {
     ) );
 }
 
+function pgc_sgb_admin_localize_assets() {
+    if ( !is_admin() ) {
+        return;
+    }
+    global $pgc_sgb_skins_list, $pgc_sgb_skins_presets;
+    $globalJS = array(
+        'ajaxurl'       => admin_url( 'admin-ajax.php' ),
+        'adminurl'      => get_admin_url(),
+        'nonce'         => wp_create_nonce( 'pgc-sgb-nonce' ),
+        'assets'        => PGC_SGB_URL . 'assets/',
+        'postType'      => PGC_SGB_POST_TYPE,
+        'taxonomy'      => PGC_SGB_TAXONOMY,
+        'skinsFolder'   => PGC_SGB_URL . 'blocks/skins/',
+        'searcher'      => PGC_SGB_URL . 'blocks/pgc_sgb.min.js' . '?ver=' . PGC_SGB_VERSION,
+        'skinsList'     => $pgc_sgb_skins_list,
+        'wpApiRoot'     => esc_url_raw( rest_url() ),
+        'skinsSettings' => $pgc_sgb_skins_presets,
+        'admin'         => true,
+    );
+    wp_localize_script( PGC_SGB_SLUG . '-script', 'PGC_SGB_ADMIN', $globalJS );
+    wp_localize_script( PGC_SGB_SLUG . '-script', 'PGC_SGB', $globalJS );
+}
+
 add_action( 'init', 'pgc_sgb_block_assets' );
 add_action(
     'customize_preview_init',
@@ -348,3 +355,4 @@ add_action(
     10,
     1
 );
+add_action( 'admin_enqueue_scripts', 'pgc_sgb_admin_localize_assets', 3000 );
