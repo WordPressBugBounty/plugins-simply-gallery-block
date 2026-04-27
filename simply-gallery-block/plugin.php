@@ -6,7 +6,7 @@
  * Description: Simply Gallery is a mixed media gallery plugin that lets you combine images, video, and audio in a single gallery. Supports HTML5 video, YouTube, Vimeo, and VideoPress, and adds a customizable lightbox to native WordPress galleries.
  * Author: GalleryCreator
  * Author URI: https://blockslib.com/
- * Version: 3.3.2.3
+ * Version: 3.3.3
  * Text Domain: simply-gallery-block
  * Domain Path: /languages
  * License: GPL2+
@@ -23,7 +23,7 @@ if ( !defined( 'ABSPATH' ) ) {
 if ( function_exists( 'pgc_sgb_fs' ) ) {
     pgc_sgb_fs()->set_basename( false, __FILE__ );
 } else {
-    define( 'PGC_SGB_VERSION', '3.3.2.3' );
+    define( 'PGC_SGB_VERSION', '3.3.3' );
     define( 'PGC_SGB_SLUG', 'simply-gallery-block' );
     define( 'PGC_SGB_BLOCK_PREF', 'wp-block-pgcsimplygalleryblock-' );
     define( 'PGC_SGB_PLUGIN_SLUG', 'pgc-simply-gallery-plugin' );

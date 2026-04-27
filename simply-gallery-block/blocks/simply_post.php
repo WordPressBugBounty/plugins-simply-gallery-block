@@ -741,6 +741,21 @@ function pgc_sgb_get_gallery_atr(WP_REST_Request $request)
 				$galleryQueryData = pgc_sgb_get_query_data($attrs['galleryQuery']);
 				if (isset($galleryQueryData)) $gallery = array_merge($gallery, $galleryQueryData);
 			}
+			if (function_exists('pgc_sgb_yt_feed_get_snapshot_gallery_data')) {
+				if (
+					isset($attrs['gallerySimplyYTPlaylistQuery'])
+					&& isset($attrs['gallerySimplyYTPlaylistQuery']['staticMode'])
+					&& $attrs['gallerySimplyYTPlaylistQuery']['staticMode'] === false
+				) {
+					$gallerySimplyYTPlaylistQuery = $attrs['gallerySimplyYTPlaylistQuery'];
+					$playlist_post_id = isset($gallerySimplyYTPlaylistQuery['listId']) ? absint($gallerySimplyYTPlaylistQuery['listId']) : 0;
+					if ($playlist_post_id > 0 && function_exists('pgc_sgb_yt_feed_get_snapshot_gallery_data')) {
+						$snapshot = get_post_meta($playlist_post_id, '_pgc_sgb_yt_playlist_snapshot', true);
+						$galleryQueryData = pgc_sgb_yt_feed_get_snapshot_gallery_data($snapshot);
+					}
+					if (isset($galleryQueryData)) $gallery = array_merge($gallery, $galleryQueryData);
+				}
+			}
 			if (function_exists('pgc_sgb_get_yt_query_data') && isset($attrs['galleryYTQuery'])) {
 				$gallery['galleryYTQuery'] = $attrs['galleryYTQuery'];
 				$galleryQueryData = pgc_sgb_get_yt_query_data($attrs['galleryYTQuery']);

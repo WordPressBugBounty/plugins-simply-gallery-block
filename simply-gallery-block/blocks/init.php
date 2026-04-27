@@ -325,6 +325,52 @@ function pgc_sgb_block_assets() {
     ) );
 }
 
+function pgc_sgb_get_playlist_render_skin_item(  $skin_slug, $skin_url  ) {
+    if ( !is_string( $skin_slug ) || strpos( $skin_slug, 'pgc_sgb_' ) !== 0 ) {
+        return null;
+    }
+    $skin_key = substr( $skin_slug, 8 );
+    if ( $skin_key === '' ) {
+        return null;
+    }
+    $block_name = 'pgcsimplygalleryblock/' . $skin_key;
+    $block_registry = WP_Block_Type_Registry::get_instance();
+    $block_type = $block_registry->get_registered( $block_name );
+    if ( !$block_type ) {
+        return null;
+    }
+    if ( !isset( $block_type->render_callback ) || $block_type->render_callback !== 'pgc_sgb_render_callback' ) {
+        return null;
+    }
+    return array(
+        'skinSlug'  => $skin_slug,
+        'skinKey'   => $skin_key,
+        'blockName' => $block_name,
+        'title'     => ( isset( $block_type->title ) ? (string) $block_type->title : $skin_key ),
+        'skinUrl'   => esc_url_raw( (string) $skin_url ),
+        'tier'      => ( strpos( (string) $skin_url, '/premium-skins/' ) !== false ? 'premium' : 'free' ),
+    );
+}
+
+function pgc_sgb_get_playlist_render_skins() {
+    global $pgc_sgb_skins_list;
+    if ( !is_array( $pgc_sgb_skins_list ) || empty( $pgc_sgb_skins_list ) ) {
+        return array();
+    }
+    $skins = array();
+    $excluded_skin_slugs = ( defined( 'PGC_SGB_YT_FEED_RENDER_SKIN_EXCLUDE' ) && is_array( PGC_SGB_YT_FEED_RENDER_SKIN_EXCLUDE ) ? PGC_SGB_YT_FEED_RENDER_SKIN_EXCLUDE : array() );
+    foreach ( $pgc_sgb_skins_list as $skin_slug => $skin_url ) {
+        if ( in_array( (string) $skin_slug, $excluded_skin_slugs, true ) ) {
+            continue;
+        }
+        $skin_item = pgc_sgb_get_playlist_render_skin_item( (string) $skin_slug, $skin_url );
+        if ( $skin_item ) {
+            $skins[] = $skin_item;
+        }
+    }
+    return $skins;
+}
+
 function pgc_sgb_admin_localize_assets() {
     if ( !is_admin() ) {
         return;

@@ -6,7 +6,7 @@ Tags: media gallery, audio gallery, video gallery, lightbox, album
 Requires at least: 6.6
 Tested up to: 6.9
 Requires PHP: 5.3.8
-Stable tag: 3.3.2.3
+Stable tag: 3.3.3
 License: GPL-2.0
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -90,6 +90,9 @@ The lightbox interface is designed to be familiar and intuitive, making it easy 
 ## Performance-focused ##
 The plugin is designed with performance in mind, using dynamic loading and optimized rendering to keep galleries responsive and pages lightweight.
 
+## New: YouTube Feed ##
+Turn your favorite YouTube playlists into a curated gallery workflow inside WordPress. Build your own internal playlists, publish them instantly with Quick Gallery Link, or use Dynamic Gallery Builder for full design control in the PRO plan.
+
 ## A short demo of SimpLy Gallery Blocks ##
 In this video you will see how easily you can create photo gallery using SGB Gutenberg photo gallery block.
 [youtube https://youtu.be/YEFVCGdTwtM]
@@ -125,6 +128,11 @@ Please note that you easily convert block gallery from Masonry to Justified or t
 Yes! SimpLy Gallery Blocks's core features are absolutely free.
 
 == Changelog ==
+= 3.3.3 =
+* Added: internal improvements for the premium YouTube Feed module.
+* Fixed: Mminor bug fixes.
+* Tweak: Updated Freemius SDK (2.13.1)
+
 = 3.3.2.3 =
 * Fixed: Mminor bug fixes.
 * Fixed: MLA Pickers.
