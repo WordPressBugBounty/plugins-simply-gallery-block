@@ -6,7 +6,7 @@ Tags: media gallery, audio gallery, video gallery, lightbox, album
 Requires at least: 6.6
 Tested up to: 6.9
 Requires PHP: 5.3.8
-Stable tag: 3.3.3
+Stable tag: 3.3.3.1
 License: GPL-2.0
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,9 +24,13 @@ Each gallery inside an album is loaded dynamically via AJAX and opened in a moda
 = Lightbox Plugin =
 SimpLy Lightbox Plugin easily displays all linked images from a post or page in highly customizable lightbox. Compatible with native WordPress gallery (Block or Classic Editor). Each Post or Page can have a unique lightbox setting.
 
+## New: YouTube Feed ##
+Turn your favorite YouTube playlists into a curated gallery workflow inside WordPress. Build your own internal playlists, publish them instantly with Quick Gallery Link, or use Dynamic Gallery Builder for full design control in the PRO plan.
+
 ### Links ###
 
 * [Masonry, Justified, Grid, Slider, Viewer Gallery Blocks - Live DEMO](https://simplygallery.co/)
+* [YouTube Feed](https://simplygallery.co/youtube-feed/)
 * [Album Navigator Block - Live DEMO](https://simplygallery.co/album-navigator/)
 * [Albums Block - Live DEMO](https://simplygallery.co/album-beginning/)
 * [Viewer Gallery Block - Live DEMO](https://simplygallery.co/simply-viewer/)
@@ -90,9 +94,6 @@ The lightbox interface is designed to be familiar and intuitive, making it easy 
 ## Performance-focused ##
 The plugin is designed with performance in mind, using dynamic loading and optimized rendering to keep galleries responsive and pages lightweight.
 
-## New: YouTube Feed ##
-Turn your favorite YouTube playlists into a curated gallery workflow inside WordPress. Build your own internal playlists, publish them instantly with Quick Gallery Link, or use Dynamic Gallery Builder for full design control in the PRO plan.
-
 ## A short demo of SimpLy Gallery Blocks ##
 In this video you will see how easily you can create photo gallery using SGB Gutenberg photo gallery block.
 [youtube https://youtu.be/YEFVCGdTwtM]
@@ -128,6 +129,11 @@ Please note that you easily convert block gallery from Masonry to Justified or t
 Yes! SimpLy Gallery Blocks's core features are absolutely free.
 
 == Changelog ==
+= 3.3.3.1 =
+* Security hardening: fix XSS vectors and improve output sanitization.
+* Improved YouTube Feed Quick Gallery routing, canonical URL handling, and playlist title editing in the playlist editor (PLUS / PRO).
+* Fixed: Mminor bug fixes. 
+
 = 3.3.3 =
 * Added: internal improvements for the premium YouTube Feed module.
 * Fixed: Mminor bug fixes.

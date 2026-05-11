@@ -119,7 +119,8 @@ function pgc_sgb_render_callback(  $atr, $content  ) {
         $className = $className . ' ' . sanitize_html_class( $atr['className'] );
     }
     if ( $skinType === 'slider' || $skinType === 'splitcarousel' || $skinType === 'horizon' || $skinType === 'accordion' || $skinType === 'showcase' ) {
-        $minHeight = ( isset( $atr['sliderMaxHeight'] ) ? esc_attr( $atr['sliderMaxHeight'] ) : 400 );
+        $minHeight = ( isset( $atr['sliderMaxHeight'] ) ? absint( $atr['sliderMaxHeight'] ) : 400 );
+        $minHeight = ( $minHeight > 0 ? $minHeight : 400 );
         $style = ' style="min-height:' . $minHeight . 'px"';
     }
     $is_indexing = !array_key_exists( 'isIndexing', $atr ) || filter_var( $atr['isIndexing'], FILTER_VALIDATE_BOOLEAN );
@@ -145,6 +146,7 @@ function pgc_sgb_render_callback(  $atr, $content  ) {
 
 function pgc_sgb_sanitize_custom_css(  $css  ) {
     $css = preg_replace( '#/\\*.*?\\*/#s', '', $css );
+    $css = preg_replace( '/on\\w+\\s*=\\s*[^\\s>]*/i', '', $css );
     $css = preg_replace( '/expression\\s*\\(.*?\\)/i', '', $css );
     $css = preg_replace( '/url\\s*\\(\\s*[\'"]?\\s*javascript\\s*:[^)]*\\)/i', '', $css );
     $css = preg_replace( '/javascript\\s*:[^;"}]*/i', '', $css );

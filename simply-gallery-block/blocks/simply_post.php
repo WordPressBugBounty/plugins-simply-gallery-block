@@ -129,7 +129,7 @@ function pgc_sgb_get_galleries($termId, $orderby, $order)
 function pgc_sgb_amp_cover($item)
 {
 	$captionWrap = isset($item['title'])
-		? '<div class="sgb-item-caption"><em>' . $item['title'] . '</em></div>'
+		? '<div class="sgb-item-caption"><em>' . esc_html($item['title']) . '</em></div>'
 		: '';
 	$itemElemant = '<div class="sgb-item" title="'
 		. esc_attr($item['title']) . '"><a href="'
@@ -139,7 +139,7 @@ function pgc_sgb_amp_cover($item)
 		. '" height="250'
 		//. '" data-lazy-src="" class="skip-lazy no-lazyload noLazy" '
 		. '" loading="lazy" '
-		. 'src="' . $item['thumbURL'] . '"/></a>' . $captionWrap . '</div>';
+		. 'src="' . esc_url($item['thumbURL']) . '"/></a>' . $captionWrap . '</div>';
 	return $itemElemant;
 }
 function pgc_sgb_noscript_covers($items)
@@ -176,8 +176,14 @@ function pgc_sgb_render_albums_blocks_callback($atr, $content)
 		return '';
 	}
 
-	$orderby = isset($atr['orderBy']) ? $atr['orderBy'] : 'ID';
-	$order = isset($atr['order']) ? $atr['order'] : 'ASC';
+	$orderby = isset($atr['orderBy']) ? (string) $atr['orderBy'] : 'ID';
+	if (!in_array($orderby, array('ID', 'title', 'modified', 'date'), true)) {
+		$orderby = 'ID';
+	}
+	$order = isset($atr['order']) ? strtoupper((string) $atr['order']) : 'ASC';
+	if (!in_array($order, array('ASC', 'DESC'), true)) {
+		$order = 'ASC';
+	}
 	$galleries = array();
 	if (isset($atr['useGlobalSettings']) && $atr['useGlobalSettings']) {
 		/** Depreciated 2.3.5 */
