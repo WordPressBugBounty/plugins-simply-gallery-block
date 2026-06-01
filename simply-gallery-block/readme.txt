@@ -2,110 +2,229 @@
 Author URI: https://blockslib.com/
 Plugin URI: https://simplygallery.co
 Contributors: gallerycreator
-Tags: media gallery, audio gallery, video gallery, lightbox, album
-Requires at least: 6.6
-Tested up to: 6.9
+Tags: gallery, image gallery, photo gallery, video gallery, lightbox
+Requires at least: 6.8
+Tested up to: 7.0
 Requires PHP: 5.3.8
-Stable tag: 3.3.3.1
+Stable tag: 3.3.3.2
 License: GPL-2.0
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Create mixed media galleries with images, HTML5 video, YouTube, Vimeo, and VideoPress — all in one gallery by Simply Gallery.
+Create responsive photo, image, video, and mixed media galleries for WordPress with gallery blocks, albums, sliders, and a built-in lightbox.
 == Description ==
 
-= Blocks =
-SimpLy Gallery Blocks is a friendly, easy-to-use gallery plugin with advanced options for creating responsive image, video, and audio galleries in multiple layouts, including Slider / Carousel, Masonry, Justified, Grid, and more.
+SimpLy Gallery Blocks is a powerful WordPress gallery plugin for building responsive photo galleries, image galleries, video galleries, albums, sliders, and lightbox experiences directly in the WordPress block editor.
+
+Unlike a basic image gallery plugin, SimpLy Gallery Blocks is built for mixed media. You can combine images, self-hosted HTML5 video, audio, YouTube, Vimeo, and VideoPress items in the same gallery workflow.
+
+The core plugin includes 8 dedicated WordPress gallery blocks, saved galleries, reusable shortcodes, album pages, and a built-in lightbox for both SimpLy galleries and native WordPress gallery content.
+
+It is designed for creators, photographers, agencies, educators, publishers, WooCommerce stores, and media-heavy websites that need more than a simple photo grid.
+
+= Key strengths =
+
+* Mixed media in one gallery: images, HTML5 video, audio, YouTube, Vimeo, and VideoPress.
+* Block editor-first editing with 8 included gallery blocks and visual controls.
+* Multiple responsive layouts for different presentation styles.
+* Lightweight YouTube and Vimeo galleries with one active video embed at a time.
+* Static gallery content by default, similar to native WordPress gallery blocks.
+* Albums for grouping real saved galleries under one visitor-friendly entry point.
+* Page-level lightbox manager for Image blocks, Gallery blocks, linked images, and SimpLy galleries.
+* Saved galleries and shortcodes for reuse across pages, posts, and theme areas.
+* SEO-friendly media visibility with static fallback HTML output.
+* Uses standard WordPress media sizes without creating extra image copies.
+* Albums, Album Navigator, and Tags Filter available in the core gallery workflow.
+* Items Manager with bulk selection for faster tag management.
+* Admin-controlled random gallery order without adding extra controls for visitors.
+* PRO dynamic gallery sources for larger media libraries and video workflows.
+* Mobile-friendly output with responsive controls for desktop and smaller screens.
+
+= Ready out of the box =
+
+The core plugin includes the main gallery workflow: 8 WordPress gallery blocks, Albums, Album Navigator, Saved SimpLy Gallery, Tags Filter, mixed media support, video poster generation, lightweight YouTube / Vimeo playback, SEO-friendly media output, and SimpLy Lightbox for both SimpLy galleries and native WordPress Image / Gallery blocks.
+
+PLUS is focused on more layouts and visual customization. PRO includes PLUS features and adds dynamic gallery sources for building galleries and collections from YouTube, Vimeo, WooCommerce, FileBird, Media Library Assistant, and other supported sources.
+
+= Who it is for =
+
+* Photographers and visual artists who need portfolio-style galleries.
+* Video creators and educators publishing YouTube, Vimeo, or self-hosted video collections.
+* Agencies and site builders who need reusable gallery blocks and presets.
+* Publishers, bloggers, and WooCommerce stores with media-rich content.
+* WordPress users who want gallery blocks, albums, and lightbox behavior in one plugin.
+
+= Common use cases =
+
+SimpLy Gallery Blocks can be used for many common WordPress media workflows:
+
+* Photography portfolios, client galleries, event albums, and project galleries.
+* Mixed media galleries with images, self-hosted video, audio, YouTube, Vimeo, and VideoPress items.
+* Blog posts and long-form articles where separate Image blocks and native Gallery blocks should open in one lightbox story.
+* Product galleries, lookbooks, catalog previews, and WooCommerce media collections.
+* Course pages, tutorials, documentation, and educational content with many video items.
+* Reusable gallery sections for landing pages, portfolio pages, sidebars, templates, and Elementor layouts.
+
+= Create and reuse galleries anywhere =
+
+You can create galleries directly inside posts and pages, or save them as reusable SimpLy galleries.
+
+Saved galleries can be published as their own public gallery pages, inserted with shortcodes, embedded with the Saved SimpLy Gallery block, displayed through the Elementor widget, or grouped into Albums and Album Navigator layouts.
+
+This makes it possible to design a gallery once and reuse it in different places while keeping the same media collection and presentation style.
+
+= Gallery blocks and layouts =
+
+SimpLy Gallery Blocks includes 8 WordPress gallery blocks for common presentation needs:
+
+* Masonry Gallery Block
+* Justified Gallery Block
+* Grid Gallery Block
+* Slider / Carousel Gallery Block
+* Viewer Gallery Block
+* Albums Block
+* Album Navigator Block
+* Saved SimpLy Gallery Block
+
+PLUS adds more gallery layouts and visual customization options, including Portfolio, Showcase, TagsBox, List, Split Carousel, Horizon, Accordion, and Diamond blocks. PRO includes PLUS features and adds dynamic gallery sources for building galleries and collections from external or structured content.
+
+= Mixed media support =
+
+Galleries can combine different media types in one place. You can build galleries with WordPress media library images, self-hosted MP4 video, MP3 audio, YouTube, Vimeo, and VideoPress content.
+
+For self-hosted video, the plugin includes a poster generator so you can select a video frame and use it as the featured image for the video item.
+
+= Video poster generator =
+
+For self-hosted video items, SimpLy Gallery includes a poster generator directly inside the Items Manager. Open the video item menu, choose Add Poster, and either select an image from the WordPress Media Library or capture a frame from the video itself.
+
+When you use a video frame, SimpLy Gallery creates a new WordPress media attachment from that frame and uses it as the poster image for the video item.
+
+A good poster image is important for native HTML5 video. It gives visitors a clear preview before playback, avoids relying on the browser to load the first video frame, and can improve compatibility on mobile devices and older browsers where first-frame previews may be inconsistent.
+
+= Lightweight YouTube and Vimeo galleries =
+
+SimpLy Gallery can display large YouTube and Vimeo video collections without loading every video player at once. Video galleries are thumbnail-first: the actual embedded player is created only when a visitor opens a video.
+
+When another video is selected, the previous player is stopped and removed from the page, and the new video player is embedded on demand. This keeps pages lighter even when a gallery contains many video items.
+
+This one-active-embed behavior works for manually added YouTube and Vimeo videos in the free plugin, across gallery layouts and in the lightbox. PRO adds dynamic video sources such as YouTube Feed and Vimeo collections.
+
+= Static by default, dynamic when needed =
+
+Standard SimpLy galleries are static by default, similar to native WordPress gallery blocks. Gallery content is saved with the post as block attributes and updates when you edit the gallery in the WordPress admin.
+
+This keeps the basic gallery workflow predictable and lightweight because the media list does not need to be rebuilt on every page load.
+
+When you need automatic updates, PRO dynamic gallery modes can rebuild gallery content from supported sources and cache the result for a custom number of hours per block.
+
+= WordPress media sizes, no extra image copies =
+
+SimpLy Gallery Blocks does not create additional image copies in the WordPress Media Library. For normal gallery display, the plugin uses standard WordPress image sizes, mainly Medium size for thumbnails and Large size for lightbox viewing.
+
+If the Medium size image is too small for a specific frontend layout, SimpLy Gallery can use the Large size image for the thumbnail area when needed. This happens on the frontend with JavaScript and does not create new files in the Media Library.
+
+If you want higher quality thumbnails or larger lightbox images, adjust your WordPress media settings in Settings > Media before uploading images. Existing uploads may need thumbnail regeneration after changing these settings.
+
+PLUS / PRO options can also display the original image size when maximum image quality is needed.
+
+= SEO-friendly media visibility =
+
+Media Indexing is enabled by default. SimpLy Gallery can expose gallery media to search engines using static fallback HTML for images, video, and audio.
+
+The recommended fallback mode renders media HTML inside a noscript tag, so visitors with JavaScript enabled keep the interactive gallery experience while search engines and no-JavaScript contexts can still detect gallery media.
+
+An inline HTML fallback mode is also available for all users when maximum compatibility is needed.
 
 = Albums =
-Combine multiple galleries into a single album with a dedicated splash page. Albums work as gallery collections, allowing you to group related galleries under one entry point.
 
-Each gallery inside an album is loaded dynamically via AJAX and opened in a modal view, so visitors can browse galleries directly from the album splash page without reloading the page, keeping navigation fast and seamless.
+Albums let you combine multiple saved galleries into one collection with a dedicated splash page. This is useful for events, portfolios, projects, travel collections, courses, product collections, or any site where related galleries should be presented together.
 
-= Lightbox Plugin =
-SimpLy Lightbox Plugin easily displays all linked images from a post or page in highly customizable lightbox. Compatible with native WordPress gallery (Block or Classic Editor). Each Post or Page can have a unique lightbox setting.
+Each saved gallery can keep its own design and can also be published separately as a public gallery page, inserted with a shortcode, embedded with the Saved SimpLy Gallery block, or displayed with the Elementor widget.
 
-## New: YouTube Feed ##
-Turn your favorite YouTube playlists into a curated gallery workflow inside WordPress. Build your own internal playlists, publish them instantly with Quick Gallery Link, or use Dynamic Gallery Builder for full design control in the PRO plan.
+Album content can load saved gallery content on demand via AJAX and open it in a modal view, helping large gallery collections stay lighter on the initial page load.
 
-### Links ###
+Albums and Album Navigator are available in the free plugin. PLUS adds more visual customization options, and PRO allows Album Navigator to use dynamic galleries from supported sources.
 
-* [Masonry, Justified, Grid, Slider, Viewer Gallery Blocks - Live DEMO](https://simplygallery.co/)
+= Tags Filter =
+
+Tags are managed directly inside the gallery block. In the Items Manager, each gallery item has a Tag menu where you can type tags separated by commas or choose from previously used SimpLy Tags.
+
+Items Manager also includes a multi-select mode, so you can select a group of gallery items and add or remove tags for all selected items at once.
+
+When Tags Filter is enabled for the block, those tags appear above the gallery so visitors can filter gallery items on the frontend.
+
+The basic Tags Filter is available for gallery blocks in the free plugin. PLUS / PRO plans add more control over which tags appear in a specific gallery or block, along with advanced options such as deep linking.
+
+= Gallery ordering =
+
+Gallery order is controlled by the site owner in the WordPress admin. In addition to manual ordering, galleries can use random ordering so the frontend displays a randomized set or order of items.
+
+Random ordering is intentionally an admin setting, not a visitor-facing frontend button. This keeps the public gallery interface clean while still giving site owners control over how gallery content is presented.
+
+= Page-level lightbox for WordPress content =
+
+SimpLy Lightbox is more than a lightbox for SimpLy galleries. It can also work with regular WordPress content, including Image blocks, Gallery blocks, linked images, and Classic Editor gallery content.
+
+When WordPress Image or Gallery blocks use the "Link images to media files" option, SimpLy Lightbox can open those images in a lightbox and group images from the same post or page into a browsable lightbox set.
+
+This means visitors can open one image and use next / previous navigation to browse other images from the page. Separate Image blocks and native Gallery blocks can also be grouped together, so a post can behave like one photo story instead of many isolated images.
+
+Global lightbox defaults are managed from SimpLy Gallery > Lightbox for native WordPress Gallery. Each post or page can also have its own lightbox settings through the SimpLy Lightbox editor sidebar, opened from the lightbox icon in the editor toolbar.
+
+Lightbox features include touch gestures, keyboard navigation, mouse wheel controls, zoom, thumbnails, fullscreen mode, slideshow, captions, and social sharing.
+
+= YouTube Feed and dynamic galleries =
+
+The YouTube Feed module turns YouTube playlists into a curated gallery workflow inside WordPress. You can build internal playlists, publish them with Quick Gallery Link, or use Dynamic Gallery Builder in the PRO plan for full design control.
+
+PRO dynamic gallery sources include:
+
+* YouTube playlists
+* Vimeo showcases, albums, user uploads, channels, and categories
+* WooCommerce products, categories, and tags
+* FileBird media folders
+* Media Library Assistant attachment categories and tags
+* SimpLy tags
+
+= Free, PLUS, and PRO =
+
+The core gallery blocks, mixed media workflow, albums, and lightbox features are available in the free plugin. PLUS adds more layouts and visual customization options. PRO includes PLUS features and adds dynamic gallery sources for building galleries and collections from supported data sources.
+
+= Privacy and data collection =
+
+SimpLy Gallery Blocks does not require cookies for the gallery and lightbox features to work, and the plugin does not collect visitor data.
+
+Gallery content is managed inside WordPress using standard posts, media attachments, block attributes, plugin settings, and saved gallery data. External media services such as YouTube or Vimeo may apply their own privacy behavior when their embedded players are loaded.
+
+= Main demos =
+
+* [Gallery blocks demo](https://simplygallery.co/)
 * [YouTube Feed](https://simplygallery.co/youtube-feed/)
-* [Album Navigator Block - Live DEMO](https://simplygallery.co/album-navigator/)
-* [Albums Block - Live DEMO](https://simplygallery.co/album-beginning/)
-* [Viewer Gallery Block - Live DEMO](https://simplygallery.co/simply-viewer/)
-* [Premium Showcase Gallery Block - Live DEMO](https://simplygallery.co/showcase-gallery-block/)
-* [Premium Diamond Gallery Block - Live DEMO](https://simplygallery.co/diamond/)
-* [Premium Horizon Gallery Block - Live DEMO](https://simplygallery.co/horizon-premium-gallery-block/)
-* [Premium Split Carousel Block - Live DEMO](https://simplygallery.co/split-carousel/)
-* [Premium TagsBox Block - Live DEMO](https://simplygallery.co/tagsbox-covers-gallery/)
-* [Premium Portfolio Block - Live DEMO](https://simplygallery.co/portfolio-premium-block/)
-* [Tags Filter - Live DEMO](https://simplygallery.co/grid-tags-filter/)
-* [SimpLy Slider / Carousel - Live DEMO](https://simplygallery.co/simply-slider-carousel/)
-* [YouTube and Vimeo Gallery - DEMO](https://simplygallery.co/portfolio2-youtube-vimeo-mp4/)
-* [SimpLy Lightbox and WordPress Native Gallery - DEMO](https://simplygallery.co/simply-lightbox/)
+* [Albums Block demo](https://simplygallery.co/album-beginning/)
+* [Album Navigator Block demo](https://simplygallery.co/album-navigator/)
+* [SimpLy Lightbox and WordPress Native Gallery demo](https://simplygallery.co/simply-lightbox/)
+* [YouTube and Vimeo Gallery demo](https://simplygallery.co/portfolio2-youtube-vimeo-mp4/)
 
-## Features ##
+= More layout demos =
 
-* Albums
-* Build dynamic video galleries by simply adding a [YouTube Playlist](https://simplygallery.co/youtube-playlist/) *PRO
-* Build dynamic Vimeo video galleries by simply adding a [Video Showcase / Album, User Uploads, Channel or Category](https://simplygallery.co/vimeo-showcase/) *PRO
-* Advanced Tags Filter. DeepLinking for tags. Filter without button "All" [Demo](https://simplygallery.co/advanced-tag-filter/) *PLUS/PRO
-* WooCommerce Products list, Categories and Tags - [Dynamic Gallery *PRO](https://simplygallery.co/woocommerce-products-gallery/)
-* Media Library Assistant.  Att. Cattegory and Att. Tag - Dynamic Gallery *PRO
-* [FileBird Media Folders - Dynamic Gallery *PRO](https://simplygallery.co/filebird-folders-in-media-library/)
+* [Viewer Gallery Block](https://simplygallery.co/simply-viewer/)
+* [Slider / Carousel Gallery](https://simplygallery.co/simply-slider-carousel/)
 * [Tags Filter](https://simplygallery.co/tags-filter/)
-* Poster generator for a self-hosted video (.mp4). Just select a frame and set it as a featured image for your video.
-* Hidden Gallery
-* Supports Photo, Video *MP4, YouTube, Vimeo and Audio *MP3 Lightbox is enabled by default*
-* HTML5 Browser History support - Deep linking. Disabled by default*
-* Lightbox - Mouse wheel navigation and Fading Transition
-* Automatic SlideShow support (with CountDown timer)
-* Multi-touch gestures support
-* Thumbnails support
-* Fully Responsive
-* Mobile Friendly
-* Unlimited colors
-* SVG icon
-* Physics Based Animations
-* FullScreen support
-* Browser features control (scrollbar, mousewheel, right click prevention)
-* Inactive State detection
-* Smart Resizing
-* HTML Caption (Attachment Caption or Alternative Text)
-* Keyboard and mouse wheel support (navigate and zoom)
-* Social Sharing (Facebook, Twitter, Pinterest)
-* Smart Loading
+* [Advanced Tags Filter](https://simplygallery.co/advanced-tag-filter/)
+* [Showcase Gallery Block - PLUS layout](https://simplygallery.co/showcase-gallery-block/)
+* [Diamond Gallery Block - PLUS layout](https://simplygallery.co/diamond/)
+* [Horizon Gallery Block - PLUS layout](https://simplygallery.co/horizon-premium-gallery-block/)
+* [Split Carousel Block - PLUS layout](https://simplygallery.co/split-carousel/)
+* [TagsBox Gallery Block - PLUS layout](https://simplygallery.co/tagsbox-covers-gallery/)
+* [Portfolio Gallery Block - PLUS layout](https://simplygallery.co/portfolio-premium-block/)
 
-## Flexible gallery building ##
-Mixed Media Gallery Blocks provides a flexible gallery building experience for images, video, and audio. Add media items to your gallery, adjust display settings, and publish galleries using different layouts depending on your content needs.
+= Short demo =
 
-## Transformable gallery layouts ##
-Galleries can be transformed between different layouts such as Masonry, Grid, Justified, and fullscreen views. This allows you to reuse the same gallery content while changing its visual presentation without rebuilding it.
+This video shows how to create a photo gallery with a SimpLy Gallery block:
 
-## Responsive by design ##
-Gallery layouts are responsive by default and adapt to different screen sizes. Separate styling controls for desktop and mobile help ensure galleries remain usable and visually consistent across devices.
-
-## Lightbox experience ##
-The built-in lightbox supports touch gestures, keyboard navigation, and mouse wheel controls. Users can navigate, zoom, and interact with gallery items on both desktop and mobile devices.
-
-The lightbox interface is designed to be familiar and intuitive, making it easy for visitors to browse media content without leaving the page.
-
-## Performance-focused ##
-The plugin is designed with performance in mind, using dynamic loading and optimized rendering to keep galleries responsive and pages lightweight.
-
-## A short demo of SimpLy Gallery Blocks ##
-In this video you will see how easily you can create photo gallery using SGB Gutenberg photo gallery block.
 [youtube https://youtu.be/YEFVCGdTwtM]
-Please note that you easily convert block gallery from Masonry to Justified or to Grid or to WordPress image gallery and vice versa.
 
-= Included Gallery Gutenberg Blocks =
-
- * Albums Block
- * Slider / Carousel Gallery Block
- * Masonry Gallery Block
- * Justified Block
- * Grid Block
+You can transform the same gallery content between Masonry, Justified, Grid, and WordPress image gallery layouts without rebuilding the gallery from scratch.
 
 == Screenshots ==
 
@@ -119,28 +238,94 @@ Please note that you easily convert block gallery from Masonry to Justified or t
 
 == Installation ==
 
-1. Upload the `simply-gallery-block` folder to your `/wp-content/plugins/` directory or alternatively upload the block-gallery.zip file via the plugin page of WordPress by clicking 'Add New' and selecting the zip from your computer.
-2. Install and activate the Gutenberg WordPress plugin (if pre WordPress 5.0).
-3. Activate the SimpLy Gallery WordPress plugin through the 'Plugins' menu in WordPress.
+1. Install the plugin from Plugins > Add New in your WordPress dashboard, or upload the plugin ZIP file manually.
+2. Activate SimpLy Gallery Blocks from the Plugins screen.
+3. Open the block editor and add one of the SimpLy Gallery blocks to a post, page, or saved gallery.
 
 == Frequently Asked Questions ==
 
 = Is SimpLy Gallery Blocks free? =
-Yes! SimpLy Gallery Blocks's core features are absolutely free.
+Yes. The core gallery blocks, mixed media gallery workflow, albums, and lightbox features are available in the free plugin.
+
+= What media types can I use? =
+You can create galleries with images, self-hosted MP4 video, MP3 audio, YouTube, Vimeo, and VideoPress content.
+
+= Can I create poster images for self-hosted videos? =
+Yes. For self-hosted video items, open the item menu in the Items Manager and choose Add Poster. You can select an image from the WordPress Media Library or capture a frame from the video. When a frame is used, SimpLy Gallery creates a new WordPress media attachment and uses it as the video poster.
+
+= Why is a video poster important? =
+A poster image gives native HTML5 video a reliable preview before playback. It improves the visitor experience, avoids forcing the browser to load the first video frame as a preview, and can help with compatibility on mobile devices and older browsers.
+
+= Does SimpLy Gallery load all YouTube or Vimeo players at once? =
+No. Video galleries are thumbnail-first. SimpLy Gallery creates the actual YouTube or Vimeo embed only for the active video, then stops and replaces it when another video is selected. This works for manually added YouTube and Vimeo videos in the free plugin, including lightbox playback.
+
+= How many gallery blocks are included in the free plugin? =
+The free plugin includes 8 WordPress gallery blocks: Masonry, Justified, Grid, Slider / Carousel, Viewer, Albums, Album Navigator, and Saved SimpLy Gallery.
+
+= Does it work with the WordPress block editor? =
+Yes. SimpLy Gallery Blocks is built around WordPress gallery blocks and is designed to be edited directly inside the WordPress block editor.
+
+= Can I reuse the same gallery in different places? =
+Yes. Saved SimpLy galleries can be reused as public gallery pages, shortcodes, Saved SimpLy Gallery blocks, Elementor widgets, or inside Albums and Album Navigator layouts.
+
+= Can I transform a native WordPress Gallery block into a SimpLy Gallery block? =
+Yes. SimpLy Gallery supports the native WordPress block transform workflow. You can transform a WordPress Gallery block into a SimpLy Gallery layout such as Masonry, Justified, Grid, Slider / Carousel, or Viewer without rebuilding the gallery content from scratch. You can also transform a SimpLy Gallery block back into the native WordPress Gallery block when needed.
+
+= Are galleries static or dynamic? =
+Standard galleries are static by default, similar to native WordPress gallery blocks. Gallery content is saved with the post and updates when you edit the gallery in the WordPress admin. PRO dynamic modes can rebuild gallery content from supported sources and cache the result for a custom number of hours per block.
+
+= Does SimpLy Gallery create extra image sizes? =
+No. SimpLy Gallery uses the image sizes generated by WordPress, mainly Medium size for thumbnails and Large size for lightbox images. If the Medium size is too small for a frontend layout, the plugin can use the Large size for the thumbnail area when needed, without creating new media files. This keeps the Media Library cleaner and works well with existing WordPress image optimization, CDN, watermark, and media workflows.
+
+= How can I improve gallery image quality? =
+Adjust the default image sizes in Settings > Media before uploading images. If you change those settings after images have already been uploaded, you may need to regenerate thumbnails so WordPress can create the updated image sizes.
+
+= Does SimpLy Gallery support SEO-friendly media output? =
+Yes. Media Indexing is enabled by default and can expose gallery media through static fallback HTML. The recommended mode uses noscript fallback output, and inline HTML output is also available for all users.
+
+= Can I use the lightbox with native WordPress Image and Gallery blocks? =
+Yes. SimpLy Lightbox can work with native WordPress Image and Gallery blocks that use the "Link images to media files" option, as well as linked images and Classic Editor gallery content.
+
+= How is SimpLy Lightbox different from the native WordPress lightbox? =
+SimpLy Lightbox can manage lightbox behavior for a whole post or page. It can group separate Image blocks and native Gallery blocks into one browsable lightbox set with next / previous navigation, while still allowing unique lightbox settings per post or page.
+
+= Where are native WordPress gallery lightbox settings managed? =
+Global defaults are managed from SimpLy Gallery > Lightbox for native WordPress Gallery. Individual post or page settings are managed from the SimpLy Lightbox editor sidebar, opened from the lightbox icon in the editor toolbar.
+
+= Can I create albums? =
+Yes. Albums and Album Navigator are available in the free plugin. They let you group saved galleries under one entry point, while each saved gallery can also be published separately or reused with a shortcode, block, or Elementor widget.
+
+= Is Tags Filter included? =
+Yes. Tags Filter is available for gallery blocks in the free plugin. You can add tags directly in the Items Manager for each gallery item, type tags separated by commas, or choose from previously used SimpLy Tags. PLUS / PRO plans add more control over the tag list used in a specific gallery or block, plus advanced options such as deep linking.
+
+= Can I add tags to multiple gallery items at once? =
+Yes. Items Manager includes a multi-select mode, so you can select multiple gallery items and add or remove tags for the selected group.
+
+= Can gallery items be shown in random order? =
+Yes. Random ordering can be selected by the site owner in the WordPress admin. The frontend displays the randomized gallery output without adding a randomize button or extra control for visitors.
+
+= Are YouTube and Vimeo dynamic galleries included in the free plugin? =
+Manual YouTube and Vimeo gallery items are supported in the gallery workflow. Dynamic gallery sources, such as YouTube playlists and Vimeo collections, are available in PRO.
+
+= Does SimpLy Gallery Blocks use cookies or collect visitor data? =
+No. The gallery and lightbox features do not require cookies, and the plugin does not collect visitor data. External services such as YouTube or Vimeo may apply their own privacy behavior when their embedded players are loaded.
 
 == Changelog ==
+= 3.3.3.2 =
+* Tested up to WordPress 7.0
+
 = 3.3.3.1 =
 * Security hardening: fix XSS vectors and improve output sanitization.
 * Improved YouTube Feed Quick Gallery routing, canonical URL handling, and playlist title editing in the playlist editor (PLUS / PRO).
-* Fixed: Mminor bug fixes. 
+* Fixed: minor bug fixes. 
 
 = 3.3.3 =
 * Added: internal improvements for the premium YouTube Feed module.
-* Fixed: Mminor bug fixes.
+* Fixed: minor bug fixes.
 * Tweak: Updated Freemius SDK (2.13.1)
 
 = 3.3.2.3 =
-* Fixed: Mminor bug fixes.
+* Fixed: minor bug fixes.
 * Fixed: MLA Pickers.
 
 = 3.3.2.2 =
@@ -278,7 +463,7 @@ Disabling static HTML output helps prevent gallery images from being indexed or 
  * Update: for posters on video and audio files, only the Featured Image will be used.
  * Added: Clean Style for Viewer
  * Fixed: issue with download button (Viewer Block)
- * Fixed: minor bug fixes (Vimeo Cattegories)
+ * Fixed: minor bug fixes (Vimeo Categories)
 
  = 3.0.8 =
  * Added: New block with Slider - Viewer
@@ -290,11 +475,11 @@ Disabling static HTML output helps prevent gallery images from being indexed or 
  * Update: Freemius SDK (2.5.3)
 
 = 3.0.6 =
-* Added: multiselect option for Att. Cattegory and Att. Tag (Media Library Assistant). (* PRO version).
+* Added: multiselect option for Att. Category and Att. Tag (Media Library Assistant). (* PRO version).
 * Fixed: Minor bug fixes
 
 = 3.0.5 =
-* Added: random sorting mode for dynamic galleries (Att. Cattegory, Att. Tag, FileBird Media Folders and SimpLy Tags)
+* Added: random sorting mode for dynamic galleries (Att. Category, Att. Tag, FileBird Media Folders and SimpLy Tags)
 * Fixed: sorting system for Vimeo collections (as far as Vimeo API allows). The sequence of video clips must match the source on the Vimeo service.
 * Fixed: Minor bug fixes
 
@@ -350,13 +535,13 @@ Disabling static HTML output helps prevent gallery images from being indexed or 
 * Fixed: Minor bug fixes
 
 = 2.3.4 =
-* Added: New Album Mavigation Block (* PLUS version)
+* Added: New Album Navigation Block (* PLUS version)
 * Fixed: Lightbox for Native Gallery Block and Native Image Block
 * Fixed: Major bug fixes
 
 = 2.3.3 =
-* Added: ability to publish Woocommerce Product List, Cattegory or Tag (* PRO version)
-* Fixed: MLA Cattegories, Tags and FileBird Folders - convert to staic mode (import content)
+* Added: ability to publish WooCommerce Product List, Category or Tag (* PRO version)
+* Fixed: MLA Categories, Tags and FileBird Folders - convert to static mode (import content)
 * Fixed: Minor bug fixes
 
 = 2.3.2 =
@@ -446,7 +631,7 @@ Disabling static HTML output helps prevent gallery images from being indexed or 
 
 = 2.0.1 =
 * Added: Elementor Widget for Saved SimpLy Gallery
-* Added: Dashboart Widget
+* Added: Dashboard Widget
 
 = 2.0.0 =
 * Updated: SEO Optimization
@@ -454,8 +639,8 @@ Disabling static HTML output helps prevent gallery images from being indexed or 
 * Added: SimpLy Gallery Widget
 * Added: Block for SimpLy CPT
 * Added: Storage mode for gallery. The SimpLy gallery will be available (in a simplified style) to visitors after deactivating the plugin or removing the block used
-* Updated: Save Method - no longer need additional publishing permissions for Editors (and other roles) in Multisite (Wordpress MU)
-* For galleries created in earlier versions of the plugin, an update (Reload Button) and re-save procedure is required (Update Page / Pos).
+* Updated: Save Method - no longer need additional publishing permissions for Editors (and other roles) in Multisite (WordPress MU)
+* For galleries created in earlier versions of the plugin, an update (Reload Button) and re-save procedure is required (Update Page / Post).
 
 = 1.8.4 =
 * Added: Custom CSS Editor for gallery blocks
@@ -463,7 +648,7 @@ Disabling static HTML output helps prevent gallery images from being indexed or 
 * Added: Premium List Block
 
 = 1.8.3 =
-* Added: Capabilities editor for Admin and Editor Roles - Multisite (Wordpress MU)
+* Added: Capabilities editor for Admin and Editor Roles - Multisite (WordPress MU)
 * Fixed: WPML
 * Fixed: Portfolio & Portfolio2 Blocks Tags Filter
 
@@ -496,8 +681,8 @@ Disabling static HTML output helps prevent gallery images from being indexed or 
 * Fixed: Resolved conflict with plugins Smush and Jetpack - Lazy Load system
 
 = 1.7.1 =
-* Added: Youtube and Vimeo video gallery support
-* Added: Lightbox for native gallery for Archive Page (Categoty Page)
+* Added: YouTube and Vimeo video gallery support
+* Added: Lightbox for native gallery for Archive Page (Category Page)
 * Fixed: Minor bug fixes
 
 = 1.7.0 =
@@ -523,7 +708,7 @@ Disabling static HTML output helps prevent gallery images from being indexed or 
 * minor fix
 
 = 1.4.0 =
-* Big changes - Major Udate!
+* Big changes - Major Update!
 * Added: Supports Video MP4 and Audio MP3
 * Added: Gallery sorting by Uploaded date, Title, Caption or Custom
 * Added: Caption source - Caption, Title, Alt
@@ -532,7 +717,7 @@ Disabling static HTML output helps prevent gallery images from being indexed or 
 * Added: Caption source for Lightbox - Caption, Title, Alt
 
 = 1.3.4 =
-* Fixed: plugin conflict - removing featured image of a Woocommerce product
+* Fixed: plugin conflict - removing featured image of a WooCommerce product
 
 = 1.3.3 =
 * Fixed: Lightbox Plugin conflict with custom posts
@@ -546,8 +731,8 @@ Disabling static HTML output helps prevent gallery images from being indexed or 
 = 1.3.0 =
 * Added: Lightbox for native WordPress Gallery (Gutenberg/Classic Editor)
 * Added: Gutenberg Sidebar plugin for lightbox control.
-* Added: Settings Page for Clobal Lightbox Pressets
-* Added: Settings Page for Blocks Pressets
+* Added: Settings Page for Global Lightbox Presets
+* Added: Settings Page for Blocks Presets
 
 = 1.2.2 =
 * Fixed: “Scroll down the page for the item you viewed” - smooth scroll theme compatibility
@@ -561,9 +746,9 @@ Disabling static HTML output helps prevent gallery images from being indexed or 
 
 = 1.2.0 =
 * Added: Global Preset - You modify the Global Preset to change all the galleries associated with this preset (automatically)
-* Added: For Masonry and Grid new settings - Colums, Min. Thumbnails with (Mobile Device)
+* Added: For Masonry and Grid new settings - Columns, Min. Thumbnails width (Mobile Device)
 * Added: For Justified new option - Last Row Mode
-* Added: For Lightbox new transition moode - Fading/Slipping
+* Added: For Lightbox new transition mode - Fading/Slipping
 * Added: Thumbnails - native lazy loading
 * Changed: Data structure
 
