@@ -1,12 +1,12 @@
-=== Mixed Media Gallery Blocks ===
+=== SimpLy Gallery ===
 Author URI: https://blockslib.com/
 Plugin URI: https://simplygallery.co
 Contributors: gallerycreator
 Tags: gallery, image gallery, photo gallery, video gallery, lightbox
 Requires at least: 6.8
 Tested up to: 7.0
-Requires PHP: 5.3.8
-Stable tag: 3.3.3.2
+Requires PHP: 7.4
+Stable tag: 3.3.3.3
 License: GPL-2.0
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -311,6 +311,10 @@ Manual YouTube and Vimeo gallery items are supported in the gallery workflow. Dy
 No. The gallery and lightbox features do not require cookies, and the plugin does not collect visitor data. External services such as YouTube or Vimeo may apply their own privacy behavior when their embedded players are loaded.
 
 == Changelog ==
+= 3.3.3.3 =
+* Tweak: Updated Freemius SDK to version (2.13.2)
+* Tweak: Improved title marker styling for wrapped lines.
+
 = 3.3.3.2 =
 * Tested up to WordPress 7.0
 

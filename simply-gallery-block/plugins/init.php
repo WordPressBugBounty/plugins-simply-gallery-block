@@ -45,6 +45,14 @@ function pgc_sgb_plugin_init() {
     if ( function_exists( 'wp_set_script_translations' ) ) {
         wp_set_script_translations( PGC_SGB_PLUGIN_SLUG . '-script', 'simply-gallery-block', PGC_SGB_URL . 'languages' );
     }
+    if ( !is_admin() ) {
+        return;
+    }
+    $rewrite_version = get_option( 'pgc_sgb_gallery_rewrite_rules_version', '' );
+    if ( !$rewrite_version ) {
+        flush_rewrite_rules( false );
+        update_option( 'pgc_sgb_gallery_rewrite_rules_version', PGC_SGB_VERSION, false );
+    }
 }
 
 function pgc_sgb_plugin_frontend_scripts() {
