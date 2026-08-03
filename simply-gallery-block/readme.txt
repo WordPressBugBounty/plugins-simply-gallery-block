@@ -6,7 +6,7 @@ Tags: gallery, image gallery, photo gallery, video gallery, lightbox
 Requires at least: 6.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 3.3.3.3
+Stable tag: 3.4.0
 License: GPL-2.0
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -31,19 +31,22 @@ It is designed for creators, photographers, agencies, educators, publishers, Woo
 * Albums for grouping real saved galleries under one visitor-friendly entry point.
 * Page-level lightbox manager for Image blocks, Gallery blocks, linked images, and SimpLy galleries.
 * Saved galleries and shortcodes for reuse across pages, posts, and theme areas.
+* SimpLy Media Assistant for organizing, finding, uploading, and reusing WordPress media with SimpLy folders and tags.
+* Quick static gallery creation from SimpLy folders and tags with Import Media from SimpLy Folders/Tags.
 * SEO-friendly media visibility with static fallback HTML output.
 * Uses standard WordPress media sizes without creating extra image copies.
 * Albums, Album Navigator, and Tags Filter available in the core gallery workflow.
 * Items Manager with bulk selection for faster tag management.
 * Admin-controlled random gallery order without adding extra controls for visitors.
-* PRO dynamic gallery sources for larger media libraries and video workflows.
+* Optional Media Library and media picker integration, so site owners can choose how deeply SimpLy Assistant appears in their admin workflow.
+* PRO dynamic gallery sources for larger media libraries, folder-based galleries, and video workflows.
 * Mobile-friendly output with responsive controls for desktop and smaller screens.
 
 = Ready out of the box =
 
-The core plugin includes the main gallery workflow: 8 WordPress gallery blocks, Albums, Album Navigator, Saved SimpLy Gallery, Tags Filter, mixed media support, video poster generation, lightweight YouTube / Vimeo playback, SEO-friendly media output, and SimpLy Lightbox for both SimpLy galleries and native WordPress Image / Gallery blocks.
+The core plugin includes the main gallery workflow: 8 WordPress gallery blocks, Albums, Album Navigator, Saved SimpLy Gallery, Tags Filter, mixed media support, video poster generation, lightweight YouTube / Vimeo playback, SEO-friendly media output, SimpLy Media Assistant, and SimpLy Lightbox for both SimpLy galleries and native WordPress Image / Gallery blocks.
 
-PLUS is focused on more layouts and visual customization. PRO includes PLUS features and adds dynamic gallery sources for building galleries and collections from YouTube, Vimeo, WooCommerce, FileBird, Media Library Assistant, and other supported sources.
+PLUS is focused on more layouts and visual customization. PRO includes PLUS features and adds dynamic gallery sources for building galleries and collections from SimpLy folders, YouTube, Vimeo, WooCommerce, FileBird, Media Library Assistant, and other supported sources.
 
 = Who it is for =
 
@@ -63,6 +66,8 @@ SimpLy Gallery Blocks can be used for many common WordPress media workflows:
 * Product galleries, lookbooks, catalog previews, and WooCommerce media collections.
 * Course pages, tutorials, documentation, and educational content with many video items.
 * Reusable gallery sections for landing pages, portfolio pages, sidebars, templates, and Elementor layouts.
+* Organizing large WordPress Media Libraries with SimpLy folders and tags before creating galleries.
+* Quickly creating static galleries from existing SimpLy folders or tags without manually selecting every attachment again.
 
 = Create and reuse galleries anywhere =
 
@@ -71,6 +76,20 @@ You can create galleries directly inside posts and pages, or save them as reusab
 Saved galleries can be published as their own public gallery pages, inserted with shortcodes, embedded with the Saved SimpLy Gallery block, displayed through the Elementor widget, or grouped into Albums and Album Navigator layouts.
 
 This makes it possible to design a gallery once and reuse it in different places while keeping the same media collection and presentation style.
+
+= SimpLy Media Assistant =
+
+SimpLy Media Assistant is an admin workflow for organizing and reusing WordPress media more efficiently. It is available from Media > SimpLy Assistant.
+
+The Assistant helps you browse media, filter by SimpLy folders and tags, upload files, assign media to folders or tags, and prepare media collections before publishing them in galleries.
+
+All users can use SimpLy Media Assistant and SimpLy folders/tags organization tools. The free plugin also includes the Import Media from SimpLy Folders/Tags workflow in SimpLy gallery blocks, so you can quickly create a normal static gallery from media already organized in a SimpLy folder or tag.
+
+SimpLy Assistant integration is flexible. Site owners can choose whether to show SimpLy folders in the WordPress Media Library, add the Assistant to native WordPress media pickers, or use the SimpLy Media Picker as the main picker for SimpLy gallery blocks.
+
+This is useful when SimpLy Gallery is the main media organization tool on a site, but it also keeps the plugin friendly to sites that already use another Media Library organizer. You can decide how much of the Assistant appears in your admin workflow from the plugin settings.
+
+PRO users can also build dynamic galleries from selected SimpLy folders, including folder-based sources that can update automatically instead of becoming a one-time static gallery snapshot.
 
 = Gallery blocks and layouts =
 
@@ -179,6 +198,7 @@ The YouTube Feed module turns YouTube playlists into a curated gallery workflow 
 
 PRO dynamic gallery sources include:
 
+* SimpLy folders
 * YouTube playlists
 * Vimeo showcases, albums, user uploads, channels, and categories
 * WooCommerce products, categories, and tags
@@ -272,7 +292,16 @@ Yes. Saved SimpLy galleries can be reused as public gallery pages, shortcodes, S
 Yes. SimpLy Gallery supports the native WordPress block transform workflow. You can transform a WordPress Gallery block into a SimpLy Gallery layout such as Masonry, Justified, Grid, Slider / Carousel, or Viewer without rebuilding the gallery content from scratch. You can also transform a SimpLy Gallery block back into the native WordPress Gallery block when needed.
 
 = Are galleries static or dynamic? =
-Standard galleries are static by default, similar to native WordPress gallery blocks. Gallery content is saved with the post and updates when you edit the gallery in the WordPress admin. PRO dynamic modes can rebuild gallery content from supported sources and cache the result for a custom number of hours per block.
+Standard galleries are static by default, similar to native WordPress gallery blocks. Gallery content is saved with the post and updates when you edit the gallery in the WordPress admin. The free Import Media from SimpLy Folders/Tags workflow creates a static gallery snapshot from organized media. PRO dynamic modes can rebuild gallery content from supported sources, including selected SimpLy folders, and cache the result for a custom number of hours per block.
+
+= What is SimpLy Media Assistant? =
+SimpLy Media Assistant is an admin media organization workflow available from Media > SimpLy Assistant. It helps you organize WordPress media with SimpLy folders and tags, filter media, upload files, and reuse organized media in gallery workflows.
+
+= Can I use SimpLy folders with normal gallery creation? =
+Yes. All users can use Import Media from SimpLy Folders/Tags inside SimpLy gallery blocks to quickly create a normal static gallery from already organized media. PRO users can also create dynamic galleries based on selected SimpLy folders.
+
+= Can I choose where SimpLy Assistant appears? =
+Yes. The plugin settings let you choose the level of Assistant integration. You can enable or disable SimpLy folders in the WordPress Media Library, native WordPress media pickers, and the SimpLy gallery block picker workflow. Open Media > SimpLy Assistant, then use Options in the top-right corner of the screen to adjust these integration settings.
 
 = Does SimpLy Gallery create extra image sizes? =
 No. SimpLy Gallery uses the image sizes generated by WordPress, mainly Medium size for thumbnails and Large size for lightbox images. If the Medium size is too small for a frontend layout, the plugin can use the Large size for the thumbnail area when needed, without creating new media files. This keeps the Media Library cleaner and works well with existing WordPress image optimization, CDN, watermark, and media workflows.
@@ -311,6 +340,14 @@ Manual YouTube and Vimeo gallery items are supported in the gallery workflow. Dy
 No. The gallery and lightbox features do not require cookies, and the plugin does not collect visitor data. External services such as YouTube or Vimeo may apply their own privacy behavior when their embedded players are loaded.
 
 == Changelog ==
+= 3.4.0 =
+* Added: SimpLy Media Assistant for organizing, uploading, filtering, and reusing WordPress media with SimpLy folders and tags.
+* Added: Import Media from SimpLy Folders/Tags for quickly creating static SimpLy galleries from organized media.
+* Added: optional Assistant integration levels for the Media Library, native WordPress media pickers, and SimpLy gallery block picker workflow.
+* Added: PRO dynamic gallery source support for SimpLy folders.
+* Tweak: Updated Freemius SDK (2.13.4)
+
+
 = 3.3.3.3 =
 * Tweak: Updated Freemius SDK to version (2.13.2)
 * Tweak: Improved title marker styling for wrapped lines.

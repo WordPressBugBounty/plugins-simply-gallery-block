@@ -744,7 +744,7 @@ function pgc_sgb_get_gallery_atr(WP_REST_Request $request)
 			}
 			if (function_exists('pgc_sgb_get_query_data') && isset($attrs['galleryQuery'])) {
 				$gallery['galleryQuery'] = $attrs['galleryQuery'];
-				$galleryQueryData = pgc_sgb_get_query_data($attrs['galleryQuery']);
+				$galleryQueryData = pgc_sgb_get_query_data($attrs['galleryQuery'], !empty($attrs['galleryId']) ? 'sgb_' . $attrs['galleryId'] : null);
 				if (isset($galleryQueryData)) $gallery = array_merge($gallery, $galleryQueryData);
 			}
 			if (function_exists('pgc_sgb_yt_feed_get_snapshot_gallery_data')) {

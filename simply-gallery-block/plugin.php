@@ -6,7 +6,7 @@
  * Description: Simply Gallery is a mixed media gallery plugin that lets you combine images, video, and audio in a single gallery. Supports HTML5 video, YouTube, Vimeo, and VideoPress, and adds a customizable lightbox to native WordPress galleries.
  * Author: GalleryCreator
  * Author URI: https://blockslib.com/
- * Version: 3.3.3.3
+ * Version: 3.4.0
  * Text Domain: simply-gallery-block
  * Domain Path: /languages
  * License: GPL2+
@@ -23,7 +23,7 @@ if ( !defined( 'ABSPATH' ) ) {
 if ( function_exists( 'pgc_sgb_fs' ) ) {
     pgc_sgb_fs()->set_basename( false, __FILE__ );
 } else {
-    define( 'PGC_SGB_VERSION', '3.3.3.3' );
+    define( 'PGC_SGB_VERSION', '3.4.0' );
     define( 'PGC_SGB_SLUG', 'simply-gallery-block' );
     define( 'PGC_SGB_BLOCK_PREF', 'wp-block-pgcsimplygalleryblock-' );
     define( 'PGC_SGB_PLUGIN_SLUG', 'pgc-simply-gallery-plugin' );
@@ -404,6 +404,41 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
         return $res;
     }
 
+    function pgc_sgb_delete_post_tags_meta(  $postIDs, $tagsArr, $attachment_only = false  ) {
+        if ( !is_array( $postIDs ) ) {
+            $postIDs = array($postIDs);
+        }
+        if ( !is_array( $tagsArr ) ) {
+            $tagsArr = array($tagsArr);
+        }
+        $postIDs = array_values( array_filter( array_map( 'absint', $postIDs ) ) );
+        $tagsArr = array_values( array_filter( array_map( 'sanitize_text_field', $tagsArr ) ) );
+        $deleted = array();
+        $skipped = array();
+        foreach ( $postIDs as $postId ) {
+            if ( $attachment_only && get_post_type( $postId ) !== 'attachment' ) {
+                $skipped[] = $postId;
+                continue;
+            }
+            if ( !current_user_can( 'delete_post_meta', $postId ) ) {
+                $skipped[] = $postId;
+                continue;
+            }
+            foreach ( $tagsArr as $tag ) {
+                if ( !isset( $deleted[$postId] ) ) {
+                    $deleted[$postId] = array();
+                }
+                if ( $tag !== '' && delete_post_meta( $postId, 'pgc_sgb_tag', $tag ) ) {
+                    $deleted[$postId][] = $tag;
+                }
+            }
+        }
+        return array(
+            'deleted' => $deleted,
+            'skipped' => $skipped,
+        );
+    }
+
     function pgc_sgb_can_write_direct(  $path  ) {
         require_once ABSPATH . 'wp-admin/includes/file.php';
         if ( get_filesystem_method( array(), $path, true ) === 'direct' ) {
@@ -643,18 +678,8 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
                 $key = $json['key'];
                 if ( isset( $tagsArr ) && isset( $postIDs ) && isset( $key ) && $key === 'pgc_sgb_tag' ) {
                     $out['message'][$json['key']] = true;
-                    foreach ( $postIDs as $postId ) {
-                        if ( current_user_can( 'delete_post_meta', intval( $postId ) ) ) {
-                            foreach ( $tagsArr as $val ) {
-                                if ( !isset( $data[$postId] ) ) {
-                                    $data[$postId] = array();
-                                }
-                                if ( delete_post_meta( $postId, $json['key'], $val ) ) {
-                                    array_push( $data[$postId], $val );
-                                }
-                            }
-                        }
-                    }
+                    $delete_result = pgc_sgb_delete_post_tags_meta( $postIDs, $tagsArr );
+                    $data = $delete_result['deleted'];
                 }
                 break;
             case 'get_attachments_for_admin':
@@ -798,6 +823,38 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
                     }
                 }
                 break;
+            case 'get_media_organization_sources':
+                $data = array(
+                    'folders' => array(),
+                    'tags'    => array(),
+                );
+                if ( !current_user_can( 'upload_files' ) ) {
+                    $out['message']['success'] = false;
+                    $out['message']['error'] = 'Error: Insufficient permissions';
+                    break;
+                }
+                if ( function_exists( 'pgc_sgb_media_folders_get_terms' ) && function_exists( 'pgc_sgb_media_folders_normalize_term' ) ) {
+                    $folder_counts = ( function_exists( 'pgc_sgb_media_folders_get_counts' ) ? pgc_sgb_media_folders_get_counts() : array() );
+                    foreach ( pgc_sgb_media_folders_get_terms() as $term ) {
+                        $count_key = (string) $term->term_id;
+                        $data['folders'][] = pgc_sgb_media_folders_normalize_term( $term, ( isset( $folder_counts[$count_key] ) ? $folder_counts[$count_key] : null ) );
+                    }
+                }
+                if ( function_exists( 'pgc_sgb_media_folders_get_normalized_tags' ) ) {
+                    $data['tags'] = pgc_sgb_media_folders_get_normalized_tags();
+                } else {
+                    $tags_string = ( function_exists( 'pgc_sgb_get_tags_list' ) ? pgc_sgb_get_tags_list() : '' );
+                    $tags = ( $tags_string === '' ? array() : array_filter( array_map( 'trim', explode( ',', $tags_string ) ) ) );
+                    natcasesort( $tags );
+                    foreach ( $tags as $tag ) {
+                        $data['tags'][] = array(
+                            'name'  => $tag,
+                            'count' => 0,
+                        );
+                    }
+                }
+                $out['message']['success'] = true;
+                break;
             case 'get_categories_by_taxonomy':
                 $taxonomy = $json['taxonomy'];
                 $categories = get_categories( [
@@ -904,17 +961,32 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
                 $data[$taxonomyName] = $terms;
                 break;
             case 'deletePosts':
+                $post_type = ( isset( $json['post_type'] ) ? sanitize_key( $json['post_type'] ) : '' );
+                if ( $post_type !== 'pgc_simply_cache' ) {
+                    $out['message']['success'] = false;
+                    $out['message']['error'] = 'Error: Invalid cache post type';
+                    break;
+                }
                 $p_arg = array(
-                    'post_type'   => $json['post_type'],
-                    'post_status' => 'publish',
+                    'post_type'     => 'pgc_simply_cache',
+                    'post_status'   => 'publish',
+                    'numberposts'   => -1,
+                    'fields'        => 'ids',
+                    'no_found_rows' => true,
                 );
                 if ( isset( $json['name'] ) ) {
-                    $p_arg['name'] = $json['name'];
+                    $name = ( function_exists( 'pgc_sgb_normalize_cache_name' ) ? pgc_sgb_normalize_cache_name( $json['name'] ) : sanitize_title( $json['name'] ) );
+                    if ( !$name ) {
+                        $out['message']['success'] = false;
+                        $out['message']['error'] = 'Error: Invalid cache name';
+                        break;
+                    }
+                    $p_arg['name'] = $name;
                 }
-                $posts = get_posts( $p_arg );
-                if ( !empty( $posts ) ) {
-                    foreach ( $posts as $dl_post ) {
-                        $postId = intval( $dl_post->ID );
+                $post_ids = get_posts( $p_arg );
+                if ( !empty( $post_ids ) ) {
+                    foreach ( $post_ids as $post_id ) {
+                        $postId = intval( $post_id );
                         if ( current_user_can( 'delete_post', intval( $postId ) ) ) {
                             $deleted = is_object( wp_delete_post( $postId ) );
                             array_push( $data, array(
@@ -970,4 +1042,5 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
     }
     require_once plugin_dir_path( __FILE__ ) . 'blocks/init.php';
     require_once plugin_dir_path( __FILE__ ) . 'plugins/init.php';
+    require_once plugin_dir_path( __FILE__ ) . 'plugins/media_folders/init.php';
 }

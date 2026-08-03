@@ -104,11 +104,16 @@ function pgc_sgb_render_callback(  $atr, $content  ) {
     unset($galleryDataArr['startPosIndex']);
     unset($galleryDataArr['selectedItems']);
     $galleryQueryData = null;
-    if ( isset( $atr['images'] ) ) {
+    $galleryId = ( !isset( $atr['galleryId'] ) || $atr['galleryId'] === '' ? wp_unique_id( 'pgc_sgb_' ) : $atr['galleryId'] );
+    $galleryDataArr['galleryId'] = $galleryId;
+    if ( isset( $atr['images'] ) && is_array( $atr['images'] ) ) {
         $galleryDataArr['images'] = array_map( 'pgc_sgb_prepare_item_for_js', $atr['images'] );
-        $galleryDataArr['itemsMetaDataCollection'] = ( isset( $atr['itemsMetaDataCollection'] ) ? $atr['itemsMetaDataCollection'] : array() );
-        $galleryData = serialize_block_attributes( $galleryDataArr );
+    } else {
+        $atr['images'] = array();
+        $galleryDataArr['images'] = array();
     }
+    $galleryDataArr['itemsMetaDataCollection'] = ( isset( $atr['itemsMetaDataCollection'] ) && is_array( $atr['itemsMetaDataCollection'] ) ? $atr['itemsMetaDataCollection'] : array() );
+    $galleryData = serialize_block_attributes( $galleryDataArr );
     $skinType = substr( $atr['galleryType'], 8 );
     $align = '';
     if ( isset( $atr['align'] ) ) {
@@ -135,12 +140,12 @@ function pgc_sgb_render_callback(  $atr, $content  ) {
         }
     }
     $preloaderColor = ( isset( $galleryDataArr['galleryPreloaderColor'] ) ? $galleryDataArr['galleryPreloaderColor'] : '#d4d4d4' );
-    $preloder = '<div class="sgb-preloader" id="pr_' . esc_attr( $atr['galleryId'] ) . '">
+    $preloder = '<div class="sgb-preloader" id="pr_' . esc_attr( $galleryId ) . '">
 	<div class="sgb-square" style="background:' . esc_attr( $preloaderColor ) . '"></div>
 	<div class="sgb-square" style="background:' . esc_attr( $preloaderColor ) . '"></div>
 	<div class="sgb-square" style="background:' . esc_attr( $preloaderColor ) . '"></div>
 	<div class="sgb-square" style="background:' . esc_attr( $preloaderColor ) . '"></div></div>';
-    $html = '<div class="pgc-sgb-cb ' . $className . '" data-gallery-id="' . esc_attr( $atr['galleryId'] ) . '"' . (( isset( $style ) ? pgc_sgb_sanitize_custom_css( $style ) : '' )) . '>' . $preloder . $noscript . '<script type="application/json" class="sgb-data">' . $galleryData . '</script>' . '<script>(function(){if(window.PGC_SGB && window.PGC_SGB.searcher){window.PGC_SGB.searcher.initBlocks()}})()</script>' . '</div>';
+    $html = '<div class="pgc-sgb-cb ' . $className . '" data-gallery-id="' . esc_attr( $galleryId ) . '"' . (( isset( $style ) ? pgc_sgb_sanitize_custom_css( $style ) : '' )) . '>' . $preloder . $noscript . '<script type="application/json" class="sgb-data">' . $galleryData . '</script>' . '<script>(function(){if(window.PGC_SGB && window.PGC_SGB.searcher){window.PGC_SGB.searcher.initBlocks()}})()</script>' . '</div>';
     return $html;
 }
 
@@ -232,6 +237,7 @@ function pgc_sgb_block_assets() {
             'wp-i18n',
             'wp-element',
             'wp-block-editor',
+            'wp-api-fetch',
             'wplink',
             'wp-data',
             'media',
@@ -244,6 +250,24 @@ function pgc_sgb_block_assets() {
         PGC_SGB_VERSION,
         false
     );
+    wp_localize_script( PGC_SGB_SLUG . '-js', 'PGC_SGB_MEDIA_FOLDERS', array(
+        'restBase'        => '/pgc-sgb/v1/media-folders',
+        'nonce'           => wp_create_nonce( 'wp_rest' ),
+        'currentFolderId' => -1,
+        'isCollapsed'     => false,
+        'showMediaModal'  => false,
+        'mode'            => 'select',
+        'uploadUrl'       => admin_url( 'upload.php' ),
+        'mediaUploadUrl'  => esc_url_raw( rest_url( 'wp/v2/media' ) ),
+        'assistantUrl'    => admin_url( 'upload.php?page=pgc-sgb-media-assistant' ),
+        'assistant'       => array(
+            'perPage'                => ( function_exists( 'pgc_sgb_media_folders_get_assistant_per_page' ) ? pgc_sgb_media_folders_get_assistant_per_page() : 20 ),
+            'sortBy'                 => ( function_exists( 'pgc_sgb_media_folders_get_assistant_sort_by' ) ? pgc_sgb_media_folders_get_assistant_sort_by() : 'date' ),
+            'order'                  => ( function_exists( 'pgc_sgb_media_folders_get_assistant_order' ) ? pgc_sgb_media_folders_get_assistant_order() : 'DESC' ),
+            'rememberSelectedFolder' => false,
+            'pickerMode'             => ( function_exists( 'pgc_sgb_media_folders_get_assistant_picker_mode' ) ? pgc_sgb_media_folders_get_assistant_picker_mode() : 'select' ),
+        ),
+    ) );
     wp_enqueue_script( PGC_SGB_SLUG . '-editor' );
     /** Main Blocks Translatrion */
     if ( function_exists( 'wp_set_script_translations' ) ) {
@@ -379,18 +403,20 @@ function pgc_sgb_admin_localize_assets() {
     }
     global $pgc_sgb_skins_list, $pgc_sgb_skins_presets;
     $globalJS = array(
-        'ajaxurl'       => admin_url( 'admin-ajax.php' ),
-        'adminurl'      => get_admin_url(),
-        'nonce'         => wp_create_nonce( 'pgc-sgb-nonce' ),
-        'assets'        => PGC_SGB_URL . 'assets/',
-        'postType'      => PGC_SGB_POST_TYPE,
-        'taxonomy'      => PGC_SGB_TAXONOMY,
-        'skinsFolder'   => PGC_SGB_URL . 'blocks/skins/',
-        'searcher'      => PGC_SGB_URL . 'blocks/pgc_sgb.min.js' . '?ver=' . PGC_SGB_VERSION,
-        'skinsList'     => $pgc_sgb_skins_list,
-        'wpApiRoot'     => esc_url_raw( rest_url() ),
-        'skinsSettings' => $pgc_sgb_skins_presets,
-        'admin'         => true,
+        'ajaxurl'         => admin_url( 'admin-ajax.php' ),
+        'adminurl'        => get_admin_url(),
+        'nonce'           => wp_create_nonce( 'pgc-sgb-nonce' ),
+        'assets'          => PGC_SGB_URL . 'assets/',
+        'postType'        => PGC_SGB_POST_TYPE,
+        'taxonomy'        => PGC_SGB_TAXONOMY,
+        'skinsFolder'     => PGC_SGB_URL . 'blocks/skins/',
+        'searcher'        => PGC_SGB_URL . 'blocks/pgc_sgb.min.js' . '?ver=' . PGC_SGB_VERSION,
+        'skinsList'       => $pgc_sgb_skins_list,
+        'wpApiRoot'       => esc_url_raw( rest_url() ),
+        'skinsSettings'   => $pgc_sgb_skins_presets,
+        'assistantUrl'    => admin_url( 'upload.php?page=pgc-sgb-media-assistant' ),
+        'mediaPickerMode' => ( function_exists( 'pgc_sgb_media_folders_get_assistant_picker_mode' ) ? pgc_sgb_media_folders_get_assistant_picker_mode() : 'select' ),
+        'admin'           => true,
     );
     wp_localize_script( PGC_SGB_SLUG . '-script', 'PGC_SGB_ADMIN', $globalJS );
     wp_localize_script( PGC_SGB_SLUG . '-script', 'PGC_SGB', $globalJS );
