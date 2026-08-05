@@ -6,7 +6,7 @@ Tags: gallery, image gallery, photo gallery, video gallery, lightbox
 Requires at least: 6.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 3.4.0
+Stable tag: 3.4.1
 License: GPL-2.0
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -340,6 +340,10 @@ Manual YouTube and Vimeo gallery items are supported in the gallery workflow. Dy
 No. The gallery and lightbox features do not require cookies, and the plugin does not collect visitor data. External services such as YouTube or Vimeo may apply their own privacy behavior when their embedded players are loaded.
 
 == Changelog ==
+= 3.4.1 =
+* Fixed: Sorting menu for galleries in static mode.
+* Fixed: Folder context menu and color picker appearing behind the Media Library grid.
+
 = 3.4.0 =
 * Added: SimpLy Media Assistant for organizing, uploading, filtering, and reusing WordPress media with SimpLy folders and tags.
 * Added: Import Media from SimpLy Folders/Tags for quickly creating static SimpLy galleries from organized media.
