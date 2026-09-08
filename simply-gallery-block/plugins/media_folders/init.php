@@ -500,23 +500,123 @@ function pgc_sgb_media_folders_get_normalized_tags()
 	return $tags;
 }
 
-function pgc_sgb_media_folders_normalize_media_item($post)
+function pgc_sgb_media_folders_normalize_image_src($image)
+{
+	if (!$image || empty($image[0])) {
+		return null;
+	}
+
+	return array(
+		'url'    => $image[0],
+		'src'    => $image[0],
+		'width'  => isset($image[1]) ? (int) $image[1] : 0,
+		'height' => isset($image[2]) ? (int) $image[2] : 0,
+	);
+}
+
+function pgc_sgb_media_folders_is_poster_debug_enabled($request = null)
+{
+	if ($request instanceof WP_REST_Request) {
+		return rest_sanitize_boolean($request->get_param('poster_debug')) && current_user_can('upload_files');
+	}
+
+	return defined('PGC_SGB_MEDIA_FOLDERS_DEBUG_POSTERS') && PGC_SGB_MEDIA_FOLDERS_DEBUG_POSTERS;
+}
+
+function pgc_sgb_media_folders_poster_debug_log($message, $context = array(), $enabled = false)
+{
+	if (!$enabled || !current_user_can('upload_files')) {
+		return;
+	}
+
+	error_log('[SGB MediaAssistant poster] ' . $message . ' ' . wp_json_encode($context));
+}
+
+function pgc_sgb_media_folders_get_attachment_poster($attachment_id, $type, $debug_posters = false)
+{
+	if (!in_array($type, array('audio', 'video'), true)) {
+		return null;
+	}
+
+	$poster_id = (int) get_post_thumbnail_id($attachment_id);
+	$raw_poster_id = get_post_meta($attachment_id, '_thumbnail_id', true);
+
+	pgc_sgb_media_folders_poster_debug_log(
+		'read attachment poster meta',
+		array(
+			'attachmentId' => (int) $attachment_id,
+			'type'         => $type,
+			'rawMeta'      => $raw_poster_id,
+			'posterId'     => $poster_id,
+		),
+		$debug_posters
+	);
+
+	if ($poster_id <= 0) {
+		return null;
+	}
+
+	$poster_post = get_post($poster_id);
+	$poster = array(
+		'id' => $poster_id,
+	);
+
+	foreach (array('thumbnail', 'medium', 'full') as $size) {
+		$image = pgc_sgb_media_folders_normalize_image_src(wp_get_attachment_image_src($poster_id, $size));
+
+		if ($image) {
+			$poster[$size] = $image;
+		}
+	}
+
+	pgc_sgb_media_folders_poster_debug_log(
+		'resolved attachment poster image sizes',
+		array(
+			'attachmentId' => (int) $attachment_id,
+			'posterId'     => $poster_id,
+			'posterType'   => $poster_post ? $poster_post->post_type : '',
+			'posterStatus' => $poster_post ? $poster_post->post_status : '',
+			'posterMime'   => get_post_mime_type($poster_id),
+			'hasThumbnail' => !empty($poster['thumbnail']['url']),
+			'hasMedium'    => !empty($poster['medium']['url']),
+			'hasFull'      => !empty($poster['full']['url']),
+			'poster'       => $poster,
+		),
+		$debug_posters
+	);
+
+	return count($poster) > 1 ? $poster : null;
+}
+
+function pgc_sgb_media_folders_normalize_media_item($post, $debug_posters = false)
 {
 	$attachment_id = (int) $post->ID;
 	$mime_type = get_post_mime_type($attachment_id);
 	$type = $mime_type ? strtok($mime_type, '/') : '';
 	$url = wp_get_attachment_url($attachment_id);
 	$thumbnail = wp_get_attachment_image_src($attachment_id, 'medium');
+	$poster = pgc_sgb_media_folders_get_attachment_poster($attachment_id, $type, $debug_posters);
 
 	if (!$thumbnail) {
 		$thumbnail = wp_get_attachment_image_src($attachment_id, 'thumbnail');
 	}
+
+	if (!$thumbnail && $poster) {
+		if (!empty($poster['medium']['url'])) {
+			$thumbnail = array($poster['medium']['url']);
+		} elseif (!empty($poster['thumbnail']['url'])) {
+			$thumbnail = array($poster['thumbnail']['url']);
+		} elseif (!empty($poster['full']['url'])) {
+			$thumbnail = array($poster['full']['url']);
+		}
+	}
+
 	$file = get_attached_file($attachment_id);
 	$filename = $file ? wp_basename($file) : '';
 	$folder_terms = wp_get_object_terms($attachment_id, PGC_SGB_MEDIA_FOLDER_TAXONOMY, array('fields' => 'ids'));
 	$tags = get_post_meta($attachment_id, 'pgc_sgb_tag');
 
-	return array(
+	$item = array(
 		'id'          => $attachment_id,
 		'title'       => get_the_title($attachment_id),
 		'filename'    => $filename,
@@ -532,6 +632,40 @@ function pgc_sgb_media_folders_normalize_media_item($post)
 		'parentId'    => (int) $post->post_parent,
 		'isAttached'  => (int) $post->post_parent > 0,
 	);
+
+	if ($poster) {
+		$item['poster'] = $poster;
+
+		if (!empty($poster['full'])) {
+			$item['image'] = $poster['full'];
+		}
+
+		if (!empty($poster['thumbnail'])) {
+			$item['thumb'] = $poster['thumbnail'];
+		}
+	}
+
+	if (in_array($type, array('audio', 'video'), true)) {
+		pgc_sgb_media_folders_poster_debug_log(
+			'normalized media item',
+			array(
+				'id'              => $attachment_id,
+				'title'           => get_the_title($attachment_id),
+				'mime'            => $mime_type ? $mime_type : '',
+				'type'            => $type ? $type : '',
+				'thumbnail'       => $item['thumbnail'],
+				'hasPoster'       => !empty($item['poster']),
+				'hasImage'        => !empty($item['image']['url']),
+				'hasThumb'        => !empty($item['thumb']['url']),
+				'rawThumbnailId'  => get_post_meta($attachment_id, '_thumbnail_id', true),
+				'postThumbnailId' => (int) get_post_thumbnail_id($attachment_id),
+				'item'            => $item,
+			),
+			$debug_posters
+		);
+	}
+
+	return $item;
 }
 
 function pgc_sgb_media_folders_rest_get_folders()
@@ -566,6 +700,7 @@ function pgc_sgb_media_folders_rest_get_media(WP_REST_Request $request)
 	$sort_by = sanitize_key((string) $request->get_param('sort_by'));
 	$order = strtoupper(sanitize_key((string) $request->get_param('order')));
 	$exclude_ids = array_values(array_filter(wp_parse_id_list($request->get_param('exclude_ids'))));
+	$debug_posters = pgc_sgb_media_folders_is_poster_debug_enabled($request);
 
 	if (!in_array($per_page, array(20, 50, 100), true)) {
 		$per_page = 20;
@@ -619,11 +754,26 @@ function pgc_sgb_media_folders_rest_get_media(WP_REST_Request $request)
 		);
 	}
 
+	pgc_sgb_media_folders_poster_debug_log(
+		'media REST query',
+		array(
+			'folderId' => $folder_id,
+			'type'     => $type === '' ? 'all' : $type,
+			'search'   => $search,
+			'page'     => $page,
+			'perPage'  => $per_page,
+			'sortBy'   => $sort_by,
+			'order'    => $order,
+			'queryArgs' => $args,
+		),
+		$debug_posters
+	);
+
 	$query = new WP_Query($args);
 	$items = array();
 
 	foreach ($query->posts as $post) {
-		$items[] = pgc_sgb_media_folders_normalize_media_item($post);
+		$items[] = pgc_sgb_media_folders_normalize_media_item($post, $debug_posters);
 	}
 
 	$response = rest_ensure_response(
@@ -1215,6 +1365,7 @@ function pgc_sgb_media_folders_register_rest_routes()
 				'order'     => array('required' => false, 'type' => 'string'),
 				'tag'         => array('required' => false, 'type' => 'string'),
 				'exclude_ids' => array('required' => false, 'type' => 'string'),
+				'poster_debug' => array('required' => false, 'type' => 'boolean'),
 			),
 		)
 	);

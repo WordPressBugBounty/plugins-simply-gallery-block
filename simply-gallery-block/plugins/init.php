@@ -326,6 +326,62 @@ function pgc_sgb_add_settings_page() {
         return $visible_start . str_repeat( '.', $hidden_length ) . $visible_end;
     }
 
+    function pgc_sgb_get_settings_dashboard_post_type_counts(  $post_type  ) {
+        $counts = array(
+            'available' => post_type_exists( $post_type ),
+            'total'     => 0,
+            'statuses'  => array(),
+        );
+        if ( !$counts['available'] ) {
+            return $counts;
+        }
+        $post_counts = wp_count_posts( $post_type );
+        $excluded_statuses = array('trash', 'auto-draft', 'inherit');
+        foreach ( (array) $post_counts as $status => $count ) {
+            $status_count = absint( $count );
+            $counts['statuses'][$status] = $status_count;
+            if ( !in_array( $status, $excluded_statuses, true ) ) {
+                $counts['total'] += $status_count;
+            }
+        }
+        return $counts;
+    }
+
+    function pgc_sgb_get_settings_dashboard_info() {
+        global $wpdb, $wp_version;
+        $server_software = ( isset( $_SERVER['SERVER_SOFTWARE'] ) ? sanitize_text_field( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ) ) : '' );
+        return array(
+            'system'           => array(
+                'system'            => ( defined( 'PHP_OS_FAMILY' ) ? PHP_OS_FAMILY : PHP_OS ),
+                'phpVersion'        => phpversion(),
+                'wpVersion'         => $wp_version,
+                'memoryLimit'       => ini_get( 'memory_limit' ),
+                'maxExecutionTime'  => ini_get( 'max_execution_time' ),
+                'uploadMaxFilesize' => ini_get( 'upload_max_filesize' ),
+                'postMaxSize'       => ini_get( 'post_max_size' ),
+                'serverSoftware'    => $server_software,
+                'mysqlVersion'      => ( method_exists( $wpdb, 'db_version' ) ? $wpdb->db_version() : '' ),
+            ),
+            'stats'            => array(
+                'galleries'  => pgc_sgb_get_settings_dashboard_post_type_counts( PGC_SGB_POST_TYPE ),
+                'cachePosts' => pgc_sgb_get_settings_dashboard_post_type_counts( 'pgc_simply_cache' ),
+            ),
+            'media'            => array(
+                'medium' => array(
+                    'width'  => absint( get_option( 'medium_size_w' ) ),
+                    'height' => absint( get_option( 'medium_size_h' ) ),
+                    'crop'   => false,
+                ),
+                'large'  => array(
+                    'width'  => absint( get_option( 'large_size_w' ) ),
+                    'height' => absint( get_option( 'large_size_h' ) ),
+                    'crop'   => false,
+                ),
+            ),
+            'mediaSettingsUrl' => admin_url( 'options-media.php' ),
+        );
+    }
+
     function pgc_sgb_plugin_settings_page_assets() {
         $youtube_api_key = get_option( 'pgc_sgb_ytk' );
         $vimeo_access_token = get_option( 'pgc_sgb_vtk' );
@@ -359,6 +415,7 @@ function pgc_sgb_add_settings_page() {
             'ytkMasked'         => pgc_sgb_mask_api_key( $youtube_api_key ),
             'vtkMasked'         => pgc_sgb_mask_api_key( $vimeo_access_token ),
             'assistantSettings' => ( function_exists( 'pgc_sgb_media_folders_get_assistant_settings' ) ? pgc_sgb_media_folders_get_assistant_settings() : null ),
+            'systemDashboard'   => pgc_sgb_get_settings_dashboard_info(),
         );
         wp_localize_script( PGC_SGB_PLUGIN_SLUG . '-main-settings-page-script', 'PGC_SGB_OPTIONS_PAGE', $globalJS );
         if ( function_exists( 'wp_set_script_translations' ) ) {
