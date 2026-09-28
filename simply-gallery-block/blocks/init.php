@@ -113,6 +113,11 @@ function pgc_sgb_render_callback(  $atr, $content  ) {
         $galleryDataArr['images'] = array();
     }
     $galleryDataArr['itemsMetaDataCollection'] = ( isset( $atr['itemsMetaDataCollection'] ) && is_array( $atr['itemsMetaDataCollection'] ) ? $atr['itemsMetaDataCollection'] : array() );
+    if ( isset( $galleryDataArr['galleryVMQuery'] ) && is_array( $galleryDataArr['galleryVMQuery'] ) ) {
+        if ( isset( $galleryDataArr['galleryVMQuery']['access_token'] ) ) {
+            $galleryDataArr['galleryVMQuery']['access_token'] = '***';
+        }
+    }
     $galleryData = serialize_block_attributes( $galleryDataArr );
     $skinType = substr( $atr['galleryType'], 8 );
     $align = '';
@@ -403,20 +408,21 @@ function pgc_sgb_admin_localize_assets() {
     }
     global $pgc_sgb_skins_list, $pgc_sgb_skins_presets;
     $globalJS = array(
-        'ajaxurl'         => admin_url( 'admin-ajax.php' ),
-        'adminurl'        => get_admin_url(),
-        'nonce'           => wp_create_nonce( 'pgc-sgb-nonce' ),
-        'assets'          => PGC_SGB_URL . 'assets/',
-        'postType'        => PGC_SGB_POST_TYPE,
-        'taxonomy'        => PGC_SGB_TAXONOMY,
-        'skinsFolder'     => PGC_SGB_URL . 'blocks/skins/',
-        'searcher'        => PGC_SGB_URL . 'blocks/pgc_sgb.min.js' . '?ver=' . PGC_SGB_VERSION,
-        'skinsList'       => $pgc_sgb_skins_list,
-        'wpApiRoot'       => esc_url_raw( rest_url() ),
-        'skinsSettings'   => $pgc_sgb_skins_presets,
-        'assistantUrl'    => admin_url( 'upload.php?page=pgc-sgb-media-assistant' ),
-        'mediaPickerMode' => ( function_exists( 'pgc_sgb_media_folders_get_assistant_picker_mode' ) ? pgc_sgb_media_folders_get_assistant_picker_mode() : 'select' ),
-        'admin'           => true,
+        'ajaxurl'          => admin_url( 'admin-ajax.php' ),
+        'adminurl'         => get_admin_url(),
+        'canManageOptions' => ( current_user_can( 'manage_options' ) ? '1' : '0' ),
+        'nonce'            => wp_create_nonce( 'pgc-sgb-nonce' ),
+        'assets'           => PGC_SGB_URL . 'assets/',
+        'postType'         => PGC_SGB_POST_TYPE,
+        'taxonomy'         => PGC_SGB_TAXONOMY,
+        'skinsFolder'      => PGC_SGB_URL . 'blocks/skins/',
+        'searcher'         => PGC_SGB_URL . 'blocks/pgc_sgb.min.js' . '?ver=' . PGC_SGB_VERSION,
+        'skinsList'        => $pgc_sgb_skins_list,
+        'wpApiRoot'        => esc_url_raw( rest_url() ),
+        'skinsSettings'    => $pgc_sgb_skins_presets,
+        'assistantUrl'     => admin_url( 'upload.php?page=pgc-sgb-media-assistant' ),
+        'mediaPickerMode'  => ( function_exists( 'pgc_sgb_media_folders_get_assistant_picker_mode' ) ? pgc_sgb_media_folders_get_assistant_picker_mode() : 'select' ),
+        'admin'            => true,
     );
     wp_localize_script( PGC_SGB_SLUG . '-script', 'PGC_SGB_ADMIN', $globalJS );
     wp_localize_script( PGC_SGB_SLUG . '-script', 'PGC_SGB', $globalJS );

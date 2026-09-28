@@ -6,7 +6,7 @@
  * Description: Simply Gallery is a mixed media gallery plugin that lets you combine images, video, and audio in a single gallery. Supports HTML5 video, YouTube, Vimeo, and VideoPress, and adds a customizable lightbox to native WordPress galleries.
  * Author: GalleryCreator
  * Author URI: https://blockslib.com/
- * Version: 3.4.2
+ * Version: 3.4.3
  * Text Domain: simply-gallery-block
  * Domain Path: /languages
  * License: GPL2+
@@ -23,7 +23,7 @@ if ( !defined( 'ABSPATH' ) ) {
 if ( function_exists( 'pgc_sgb_fs' ) ) {
     pgc_sgb_fs()->set_basename( false, __FILE__ );
 } else {
-    define( 'PGC_SGB_VERSION', '3.4.2' );
+    define( 'PGC_SGB_VERSION', '3.4.3' );
     define( 'PGC_SGB_SLUG', 'simply-gallery-block' );
     define( 'PGC_SGB_BLOCK_PREF', 'wp-block-pgcsimplygalleryblock-' );
     define( 'PGC_SGB_PLUGIN_SLUG', 'pgc-simply-gallery-plugin' );
@@ -75,6 +75,13 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
         do_action( 'pgc_sgb_fs_loaded' );
     }
     function pgc_sgb_fs_uninstall_cleanup() {
+        $result = pgc_sgb_archives_uninstall();
+        if ( is_wp_error( $result ) ) {
+            wp_die( esc_html__( 'The plugin could not finish removing its ZIP archives. Activate it again and use ZIP Downloads → Delete all archives in the plugin settings. Wait for active downloads to finish and resolve any storage errors, then deactivate and delete the plugin again. Original media files have not been deleted.', 'simply-gallery-block' ), '', array(
+                'response'  => 409,
+                'back_link' => true,
+            ) );
+        }
         delete_option( "pgc_sgb_global_lightbox_use" );
         delete_site_option( 'pgc_sgb_global_lightbox_use' );
     }
@@ -794,16 +801,23 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
                 }
                 break;
             case 'update_option':
+                if ( !current_user_can( 'manage_options' ) ) {
+                    wp_send_json_error( array(
+                        'message' => __( 'Insufficient permissions.', 'simply-gallery-block' ),
+                    ), 403 );
+                }
                 foreach ( $json['options'] as $key => $value ) {
                     if ( strpos( $key, 'pgc_sgb' ) === 0 ) {
-                        if ( isset( $pgc_sgb_skins_list[$key] ) ) {
-                            $out['message'][$key] = pgc_sgb_update_preset( $key, $value );
-                        } elseif ( $key === 'pgc_sgb_lightbox' ) {
+                        if ( isset( $pgc_sgb_skins_list[$key] ) || $key === 'pgc_sgb_lightbox' ) {
+                            // Presets must not replace gallery content, even with empty or null values.
+                            if ( !is_array( $value ) || array_key_exists( 'images', $value ) || array_key_exists( 'itemsMetaDataCollection', $value ) || array_key_exists( 'customCSS', $value ) && !is_string( $value['customCSS'] ) ) {
+                                $out['message'][$key] = false;
+                                $out['message']['status'] = 'invalid';
+                                continue;
+                            }
                             $out['message'][$key] = pgc_sgb_update_preset( $key, $value );
                         } else {
-                            if ( current_user_can( 'manage_options' ) ) {
-                                $out['message'][$key] = update_option( $key, $value );
-                            }
+                            $out['message'][$key] = update_option( $key, $value );
                         }
                     }
                 }
@@ -1041,6 +1055,7 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
         add_action( 'wp_ajax_pgc_sgb_action_wizard', 'pgc_sgb_action_wizard' );
     }
     require_once plugin_dir_path( __FILE__ ) . 'blocks/init.php';
+    require_once plugin_dir_path( __FILE__ ) . 'plugins/media_folders_download/init.php';
     require_once plugin_dir_path( __FILE__ ) . 'plugins/init.php';
     require_once plugin_dir_path( __FILE__ ) . 'plugins/media_folders/init.php';
 }

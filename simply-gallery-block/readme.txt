@@ -2,11 +2,11 @@
 Author URI: https://blockslib.com/
 Plugin URI: https://simplygallery.co
 Contributors: gallerycreator
-Tags: gallery, image gallery, photo gallery, video gallery, lightbox
+Tags: gallery, image gallery, media library folders, video gallery, lightbox
 Requires at least: 6.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.4.2
+Stable tag: 3.4.3
 License: GPL-2.0
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -17,7 +17,7 @@ SimpLy Gallery Blocks is a powerful WordPress gallery plugin for building respon
 
 Unlike a basic image gallery plugin, SimpLy Gallery Blocks is built for mixed media. You can combine images, self-hosted HTML5 video, audio, YouTube, Vimeo, and VideoPress items in the same gallery workflow.
 
-The core plugin includes 8 dedicated WordPress gallery blocks, saved galleries, reusable shortcodes, album pages, and a built-in lightbox for both SimpLy galleries and native WordPress gallery content.
+The core plugin includes 8 dedicated WordPress gallery blocks, saved galleries, reusable shortcodes, album pages, and a built-in lightbox for both SimpLy galleries and native WordPress gallery content. SimpLy Media Assistant adds free Media Library folders, tags, and folder ZIP downloads to help you organize the files behind your galleries.
 
 It is designed for creators, photographers, agencies, educators, publishers, WooCommerce stores, and media-heavy websites that need more than a simple photo grid.
 
@@ -31,7 +31,8 @@ It is designed for creators, photographers, agencies, educators, publishers, Woo
 * Albums for grouping real saved galleries under one visitor-friendly entry point.
 * Page-level lightbox manager for Image blocks, Gallery blocks, linked images, and SimpLy galleries.
 * Saved galleries and shortcodes for reuse across pages, posts, and theme areas.
-* SimpLy Media Assistant for organizing, finding, uploading, and reusing WordPress media with SimpLy folders and tags.
+* Free WordPress Media Library folders and tags with SimpLy Media Assistant for organizing, finding, uploading, and reusing media.
+* Download a SimpLy folder's original files as one ZIP from the Assistant or the Media Library folder sidebar.
 * Quick static gallery creation from SimpLy folders and tags with Import Media from SimpLy Folders/Tags.
 * SEO-friendly media visibility with static fallback HTML output.
 * Uses standard WordPress media sizes without creating extra image copies.
@@ -77,19 +78,32 @@ Saved galleries can be published as their own public gallery pages, inserted wit
 
 This makes it possible to design a gallery once and reuse it in different places while keeping the same media collection and presentation style.
 
-= SimpLy Media Assistant =
+= SimpLy Media Assistant - WordPress Media Library folders =
 
-SimpLy Media Assistant is an admin workflow for organizing and reusing WordPress media more efficiently. It is available from Media > SimpLy Assistant.
+Organize your WordPress Media Library into folders for photo shoots, clients, events, products, or projects. SimpLy Media Assistant brings media organization, gallery creation, and folder downloads into one workflow, with folders, tags, and ZIP downloads included in the free plugin.
 
-The Assistant helps you browse media, filter by SimpLy folders and tags, upload files, assign media to folders or tags, and prepare media collections before publishing them in galleries.
+Open Media > SimpLy Assistant to browse, upload, and organize your files. You can also enable the folder sidebar in the native WordPress Media Library to work in its familiar grid or list view.
 
-All users can use SimpLy Media Assistant and SimpLy folders/tags organization tools. The free plugin also includes the Import Media from SimpLy Folders/Tags workflow in SimpLy gallery blocks, so you can quickly create a normal static gallery from media already organized in a SimpLy folder or tag.
+* Group media in virtual folders without moving original files on your server or changing their URLs.
+* Find and reuse media by filtering with SimpLy folders and tags.
+* Upload files into the active folder and organize existing media into collections.
+* Use folder colors to distinguish projects at a glance.
+* Turn an organized folder or tag into a static gallery with Import Media from SimpLy Folders/Tags.
+* Download a folder's original files together as a ZIP archive.
 
-SimpLy Assistant integration is flexible. Site owners can choose whether to show SimpLy folders in the WordPress Media Library, add the Assistant to native WordPress media pickers, or use the SimpLy Media Picker as the main picker for SimpLy gallery blocks.
+**Download media folders as ZIP**
 
-This is useful when SimpLy Gallery is the main media organization tool on a site, but it also keeps the plugin friendly to sites that already use another Media Library organizer. You can decide how much of the Assistant appears in your admin workflow from the plugin settings.
+Need a local copy of a photo shoot or a project's media? Right-click a SimpLy folder in the Assistant or the Media Library sidebar, choose Download, then Create ZIP. Once preparation finishes, choose Download ZIP to save the originals together, without selecting and downloading each file separately.
 
-PRO users can also build dynamic galleries from selected SimpLy folders, including folder-based sources that can update automatically instead of becoming a one-time static gallery snapshot.
+The archive uses the folder's name and remains available to its creator for repeat downloads for one hour. You can delete it sooner to free disk space; deleting a prepared ZIP does not delete the original media.
+
+ZIP Downloads in the plugin settings checks whether your hosting can prepare archives and lets administrators adjust the maximum total file size and number of files per archive. Start with the defaults and increase them to suit your hosting resources.
+
+**Choose where the Assistant appears**
+
+Enable SimpLy folders in the Media Library, add the Assistant to native WordPress media pickers, or use the SimpLy Media Picker for SimpLy gallery blocks. You can also use the dedicated Assistant screen without enabling these integrations.
+
+PRO users can additionally build dynamic galleries from SimpLy folders, so published collections can reflect folder changes instead of remaining a one-time static import.
 
 = Gallery blocks and layouts =
 
@@ -267,6 +281,12 @@ You can transform the same gallery content between Masonry, Justified, Grid, and
 = Is SimpLy Gallery Blocks free? =
 Yes. The core gallery blocks, mixed media gallery workflow, albums, and lightbox features are available in the free plugin.
 
+= Can I organize the WordPress Media Library into folders? =
+Yes. The free SimpLy Media Assistant includes virtual folders and tags for organizing media. Enable its folder sidebar in the native Media Library or use Media > SimpLy Assistant. Organizing files into folders does not move the originals on your server or change their URLs.
+
+= Can I download a media folder as a ZIP file? =
+Yes. In the free plugin, right-click a SimpLy folder in the Assistant or the Media Library sidebar and choose Download. Create the archive, then use Download ZIP to save its original files. This is an authenticated admin workflow. ZIP availability and supported archive sizes depend on your hosting; checks and adjustable limits are available under ZIP Downloads in the plugin settings.
+
 = What media types can I use? =
 You can create galleries with images, self-hosted MP4 video, MP3 audio, YouTube, Vimeo, and VideoPress content.
 
@@ -340,6 +360,10 @@ Manual YouTube and Vimeo gallery items are supported in the gallery workflow. Dy
 No. The gallery and lightbox features do not require cookies, and the plugin does not collect visitor data. External services such as YouTube or Vimeo may apply their own privacy behavior when their embedded players are loaded.
 
 == Changelog ==
+= 3.4.3 =
+* Added: Download SimpLy media folders as ZIP archives of original files from the Assistant and Media Library sidebar, with adjustable archive limits and cleanup controls.
+* Security: Fixed a stored XSS vulnerability involving gallery tags and unauthorized global preset updates.
+
 = 3.4.2 =
 * Added: System Dashboard to the SimpLy Settings page with hosting details, plugin content statistics, and Media Settings information for gallery previews and lightbox images.
 

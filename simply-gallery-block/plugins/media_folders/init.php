@@ -699,7 +699,7 @@ function pgc_sgb_media_folders_rest_get_media(WP_REST_Request $request)
 	$per_page = absint($request->get_param('per_page'));
 	$sort_by = sanitize_key((string) $request->get_param('sort_by'));
 	$order = strtoupper(sanitize_key((string) $request->get_param('order')));
-	$exclude_ids = array_values(array_filter(wp_parse_id_list($request->get_param('exclude_ids'))));
+	$exclude_ids = array_values(array_filter(wp_parse_id_list($request->get_param('exclude_ids') ?? array())));
 	$debug_posters = pgc_sgb_media_folders_is_poster_debug_enabled($request);
 
 	if (!in_array($per_page, array(20, 50, 100), true)) {
@@ -1672,6 +1672,10 @@ function pgc_sgb_media_folders_enqueue_admin_assets($hook = '')
 	}
 	$did_enqueue = true;
 
+	if ($is_assistant_page || $is_media_library) {
+		pgc_sgb_archives_cleanup_run('screen');
+	}
+
 	$script_handle = PGC_SGB_SLUG . '-media-folders';
 	$style_handle = PGC_SGB_SLUG . '-media-folders';
 	$bootstrap_handle = PGC_SGB_SLUG . '-media-folders-modal-bootstrap';
@@ -1733,6 +1737,7 @@ function pgc_sgb_media_folders_enqueue_admin_assets($hook = '')
 		'PGC_SGB_MEDIA_FOLDERS',
 		array(
 			'restBase'        => '/pgc-sgb/v1/media-folders',
+			'downloadCapabilities' => pgc_sgb_media_downloads_get_ui_capabilities(),
 			'nonce'           => wp_create_nonce('wp_rest'),
 			'currentFolderId' => (int) $active_folder_id,
 			'isCollapsed'     => (bool) $is_collapsed,

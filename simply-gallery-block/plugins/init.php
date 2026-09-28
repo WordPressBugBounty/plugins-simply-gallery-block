@@ -140,6 +140,7 @@ function pgc_sgb_plugin_enqueue_assets() {
 }
 
 function pgc_sgb_activation_hook() {
+    pgc_sgb_media_downloads_refresh_capabilities();
     if ( get_option( 'pgc_sgb_global_lightbox_use', null ) === null ) {
         add_option( 'pgc_sgb_global_lightbox_use', true );
     }
@@ -362,6 +363,7 @@ function pgc_sgb_add_settings_page() {
                 'serverSoftware'    => $server_software,
                 'mysqlVersion'      => ( method_exists( $wpdb, 'db_version' ) ? $wpdb->db_version() : '' ),
             ),
+            'zipSupport'       => pgc_sgb_media_downloads_get_dashboard_capabilities(),
             'stats'            => array(
                 'galleries'  => pgc_sgb_get_settings_dashboard_post_type_counts( PGC_SGB_POST_TYPE ),
                 'cachePosts' => pgc_sgb_get_settings_dashboard_post_type_counts( 'pgc_simply_cache' ),
