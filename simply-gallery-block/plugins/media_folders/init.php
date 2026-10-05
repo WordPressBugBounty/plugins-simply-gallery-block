@@ -121,6 +121,37 @@ function pgc_sgb_media_folders_register_taxonomy()
 }
 add_action('init', 'pgc_sgb_media_folders_register_taxonomy');
 
+/** Capture creation facts once; never infer dates for existing folders. */
+function pgc_sgb_media_folders_record_creation($term_id, $tt_id, $taxonomy)
+{
+	if ($taxonomy !== PGC_SGB_MEDIA_FOLDER_TAXONOMY) {
+		return;
+	}
+	add_term_meta($term_id, '_pgc_sgb_folder_created_at', time(), true);
+	add_term_meta($term_id, '_pgc_sgb_folder_created_by', get_current_user_id(), true);
+}
+add_action('created_term', 'pgc_sgb_media_folders_record_creation', 10, 3);
+
+function pgc_sgb_media_folders_rest_details(WP_REST_Request $request)
+{
+	$folder_id = absint($request->get_param('id'));
+	$folder = get_term($folder_id, PGC_SGB_MEDIA_FOLDER_TAXONOMY);
+	if (!$folder || is_wp_error($folder)) {
+		return new WP_Error('folder_not_found', __('Media folder not found.', 'simply-gallery-block'), array('status' => 404));
+	}
+	if (!function_exists('pgc_sgb_media_downloads_scan_folder')) {
+		return new WP_Error('statistics_unavailable', __('Folder statistics are currently unavailable.', 'simply-gallery-block'), array('status' => 503));
+	}
+	$result = pgc_sgb_media_downloads_scan_folder($folder_id, max(1, (int) $request->get_param('page')));
+	$created_at = (int) get_term_meta($folder_id, '_pgc_sgb_folder_created_at', true);
+	$created_by = (int) get_term_meta($folder_id, '_pgc_sgb_folder_created_by', true);
+	$author = $created_by ? get_userdata($created_by) : false;
+	$result['folderName'] = $folder->name;
+	$result['createdAt'] = $created_at ? wp_date(get_option('date_format') . ' ' . get_option('time_format'), $created_at) : null;
+	$result['createdBy'] = $author ? $author->display_name : null;
+	return rest_ensure_response($result);
+}
+
 function pgc_sgb_media_folders_can_use($request = null, $meta_key = null, $object_id = null, $user_id = null, $cap = null, $caps = null)
 {
 	return current_user_can('upload_files');
@@ -155,6 +186,30 @@ function pgc_sgb_media_folders_get_assistant_sort_by()
 	return in_array($sort_by, $allowed, true) ? $sort_by : 'date';
 }
 
+function pgc_sgb_media_folders_get_folder_sort_by()
+{
+	$value = get_user_meta(get_current_user_id(), 'pgc_sgb_media_folders_sort_by', true);
+	return in_array($value, array('date', 'name'), true) ? $value : 'date';
+}
+
+function pgc_sgb_media_folders_get_folder_order()
+{
+	$value = get_user_meta(get_current_user_id(), 'pgc_sgb_media_folders_order', true);
+	return in_array($value, array('ASC', 'DESC'), true) ? $value : 'ASC';
+}
+
+function pgc_sgb_media_folders_update_folder_sort($settings)
+{
+	if (isset($settings['folderSortBy'])) {
+		$value = $settings['folderSortBy'];
+		update_user_meta(get_current_user_id(), 'pgc_sgb_media_folders_sort_by', in_array($value, array('date', 'name'), true) ? $value : 'date');
+	}
+	if (isset($settings['folderOrder'])) {
+		$value = $settings['folderOrder'];
+		update_user_meta(get_current_user_id(), 'pgc_sgb_media_folders_order', in_array($value, array('ASC', 'DESC'), true) ? $value : 'ASC');
+	}
+}
+
 function pgc_sgb_media_folders_get_assistant_order()
 {
 	$order = strtoupper(sanitize_key((string) get_user_meta(get_current_user_id(), PGC_SGB_MEDIA_ASSISTANT_ORDER_META, true)));
@@ -185,6 +240,8 @@ function pgc_sgb_media_folders_get_assistant_settings()
 		'rememberFolder' => pgc_sgb_media_folders_get_assistant_remember_folder(),
 		'perPage' => pgc_sgb_media_folders_get_assistant_per_page(),
 		'sortBy' => pgc_sgb_media_folders_get_assistant_sort_by(),
+		'folderSortBy' => pgc_sgb_media_folders_get_folder_sort_by(),
+		'folderOrder' => pgc_sgb_media_folders_get_folder_order(),
 		'order' => pgc_sgb_media_folders_get_assistant_order(),
 	);
 }
@@ -205,6 +262,8 @@ function pgc_sgb_media_folders_update_assistant_settings($settings)
 		PGC_SGB_MEDIA_FOLDERS_SHOW_MODAL_META,
 		!empty($settings['showModal']) ? '1' : '0'
 	);
+
+	pgc_sgb_media_folders_update_folder_sort($settings);
 
 	$assistant_per_page = isset($settings['perPage']) ? absint($settings['perPage']) : 20;
 	if (!in_array($assistant_per_page, array(20, 50, 100), true)) {
@@ -270,6 +329,36 @@ function pgc_sgb_media_folders_sanitize_color($color)
 	return $color ? $color : '';
 }
 
+function pgc_sgb_media_folders_description_html()
+{
+	return array(
+		'b' => array(), 'strong' => array(), 'u' => array(), 'i' => array(),
+		'a' => array('href' => true, 'title' => true), 'hr' => array(),
+		'h1' => array(), 'h2' => array(), 'h3' => array(), 'h4' => array(), 'p' => array(),
+	);
+}
+
+function pgc_sgb_media_folders_sanitize_description($description)
+{
+	return wp_kses($description, pgc_sgb_media_folders_description_html(), array('http', 'https', 'mailto'));
+}
+
+function pgc_sgb_media_folders_write_term($name_or_id, $args, $create = false)
+{
+	// Preserve the folder allowlist through WordPress term-description filtering.
+	$allow_html = static function ($allowed, $context) {
+		return $context === 'pre_term_description' ? pgc_sgb_media_folders_description_html() : $allowed;
+	};
+	add_filter('wp_kses_allowed_html', $allow_html, 10, 2);
+	try {
+		return $create
+			? wp_insert_term(wp_slash($name_or_id), PGC_SGB_MEDIA_FOLDER_TAXONOMY, wp_slash($args))
+			: wp_update_term($name_or_id, PGC_SGB_MEDIA_FOLDER_TAXONOMY, wp_slash($args));
+	} finally {
+		remove_filter('wp_kses_allowed_html', $allow_html, 10);
+	}
+}
+
 function pgc_sgb_media_folders_normalize_term($term, $count = null)
 {
 	if (!$term || is_wp_error($term)) {
@@ -283,6 +372,7 @@ function pgc_sgb_media_folders_normalize_term($term, $count = null)
 		'id'    => (int) $term->term_id,
 		'name'  => $term->name,
 		'slug'  => $term->slug,
+		'description' => pgc_sgb_media_folders_sanitize_description($term->description),
 		'color' => $color ? $color : '',
 		'order' => $order === '' ? 0 : (int) $order,
 		'count' => is_null($count) ? (int) $term->count : (int) $count,
@@ -872,7 +962,9 @@ function pgc_sgb_media_folders_rest_create_folder(WP_REST_Request $request)
 		return new WP_Error('folder_exists', __('A folder with this name already exists.', 'simply-gallery-block'), array('status' => 409));
 	}
 
-	$inserted = wp_insert_term($name, PGC_SGB_MEDIA_FOLDER_TAXONOMY);
+	$inserted = pgc_sgb_media_folders_write_term($name, array(
+		'description' => pgc_sgb_media_folders_sanitize_description((string) $request->get_param('description')),
+	), true);
 	if (is_wp_error($inserted)) {
 		return $inserted;
 	}
@@ -892,6 +984,72 @@ function pgc_sgb_media_folders_rest_create_folder(WP_REST_Request $request)
 	$term = get_term($term_id, PGC_SGB_MEDIA_FOLDER_TAXONOMY);
 
 	return rest_ensure_response(pgc_sgb_media_folders_normalize_term($term, 0));
+}
+
+function pgc_sgb_media_folders_rest_duplicate_folder(WP_REST_Request $request)
+{
+	if (!pgc_sgb_media_folders_can_use()) {
+		return new WP_Error('rest_forbidden', __('Sorry, you are not allowed to duplicate media folders.', 'simply-gallery-block'), array('status' => 403));
+	}
+
+	$source_id = absint($request->get_param('id'));
+	$source = get_term($source_id, PGC_SGB_MEDIA_FOLDER_TAXONOMY);
+	if (!$source || is_wp_error($source)) {
+		return new WP_Error('folder_not_found', __('Media folder not found.', 'simply-gallery-block'), array('status' => 404));
+	}
+
+	$object_ids = get_objects_in_term($source_id, PGC_SGB_MEDIA_FOLDER_TAXONOMY);
+	if (is_wp_error($object_ids)) {
+		return $object_ids;
+	}
+	$attachment_ids = array();
+	foreach ($object_ids as $object_id) {
+		$attachment_id = (int) $object_id;
+		if (get_post_type($attachment_id) !== 'attachment') {
+			continue;
+		}
+		// Check the entire collection before creating a folder or changing memberships.
+		if (!current_user_can('edit_post', $attachment_id)) {
+			return new WP_Error('rest_forbidden', __('You must be able to edit every file in this folder to duplicate it.', 'simply-gallery-block'), array('status' => 403));
+		}
+		$attachment_ids[] = $attachment_id;
+	}
+
+	// Resolve collisions on the server too, including stale lists and concurrent copies.
+	$copy_request = clone $request;
+	$base_name = sanitize_text_field((string) $request->get_param('name'));
+	$suffix = 2;
+	if (preg_match('/^(.+) ([0-9]+)$/', $base_name, $matches)) {
+		$base_name = $matches[1];
+		$suffix = max(2, (int) $matches[2] + 1);
+	}
+	for ($attempt = 0; $attempt < 100; $attempt++) {
+		$created = pgc_sgb_media_folders_rest_create_folder($copy_request);
+		if (!is_wp_error($created) || !in_array($created->get_error_code(), array('folder_exists', 'term_exists'), true)) {
+			break;
+		}
+		$copy_request->set_param('name', $base_name . ' ' . $suffix);
+		$suffix++;
+	}
+	if (is_wp_error($created)) {
+		return $created;
+	}
+	$folder = $created->get_data();
+	$term_id = (int) $folder['id'];
+	foreach ($attachment_ids as $attachment_id) {
+		$result = wp_set_object_terms($attachment_id, array($term_id), PGC_SGB_MEDIA_FOLDER_TAXONOMY, true);
+		if (is_wp_error($result)) {
+			// Remove only the new collection and its links; source memberships stay intact.
+			$removed = wp_delete_term($term_id, PGC_SGB_MEDIA_FOLDER_TAXONOMY);
+			if (is_wp_error($removed) || !$removed) {
+				return new WP_Error('duplicate_cleanup_failed', __('Duplication failed and the incomplete folder could not be removed. Refresh the folder list before trying again.', 'simply-gallery-block'), array('status' => 500, 'folder_id' => $term_id));
+			}
+			return new WP_Error('duplicate_failed', __('Could not duplicate the folder. The incomplete copy was removed. Please try again.', 'simply-gallery-block'), array('status' => 500));
+		}
+	}
+
+	$term = get_term($term_id, PGC_SGB_MEDIA_FOLDER_TAXONOMY);
+	return rest_ensure_response(pgc_sgb_media_folders_normalize_term($term, pgc_sgb_media_folders_count_query($term_id)));
 }
 
 function pgc_sgb_media_folders_rest_update_folder(WP_REST_Request $request)
@@ -915,8 +1073,12 @@ function pgc_sgb_media_folders_rest_update_folder(WP_REST_Request $request)
 		$args['name'] = $name;
 	}
 
+	if (!is_null($request->get_param('description'))) {
+		$args['description'] = pgc_sgb_media_folders_sanitize_description((string) $request->get_param('description'));
+	}
+
 	if (!empty($args)) {
-		$updated = wp_update_term($term_id, PGC_SGB_MEDIA_FOLDER_TAXONOMY, $args);
+		$updated = pgc_sgb_media_folders_write_term($term_id, $args);
 		if (is_wp_error($updated)) {
 			return $updated;
 		}
@@ -961,6 +1123,28 @@ function pgc_sgb_media_folders_rest_delete_folder(WP_REST_Request $request)
 	return rest_ensure_response(array('deleted' => (bool) $deleted));
 }
 
+function pgc_sgb_media_folders_rest_get_memberships(WP_REST_Request $request)
+{
+	$items = array();
+	$skipped = array();
+	$errors = array();
+	foreach (array_unique(array_map('absint', (array) $request->get_param('attachment_ids'))) as $id) {
+		if (get_post_type($id) !== 'attachment' || !current_user_can('edit_post', $id)) {
+			$skipped[] = $id;
+			$errors[$id] = __('This media item is unavailable or cannot be edited.', 'simply-gallery-block');
+			continue;
+		}
+		$ids = wp_get_object_terms($id, PGC_SGB_MEDIA_FOLDER_TAXONOMY, array('fields' => 'ids'));
+		if (is_wp_error($ids)) {
+			$skipped[] = $id;
+			$errors[$id] = $ids->get_error_message();
+			continue;
+		}
+		$items[] = array('id' => $id, 'folderIds' => array_map('intval', $ids));
+	}
+	return rest_ensure_response(array('items' => $items, 'skipped' => $skipped, 'errors' => (object) $errors));
+}
+
 function pgc_sgb_media_folders_rest_assign_media(WP_REST_Request $request)
 {
 	if (!pgc_sgb_media_folders_can_use()) {
@@ -968,13 +1152,21 @@ function pgc_sgb_media_folders_rest_assign_media(WP_REST_Request $request)
 	}
 
 	$folder_id = (int) $request->get_param('folder_id');
+	$operation = $request->get_param('operation');
+	$legacy = is_null($operation);
+	if (!$legacy && !in_array($operation, array('add', 'remove', 'clear'), true)) {
+		return new WP_Error('invalid_operation', __('Use a valid folder operation: add, remove, or clear.', 'simply-gallery-block'), array('status' => 400));
+	}
+	if ($folder_id < 0 || (!$legacy && (($operation === 'clear' && $folder_id !== 0) || ($operation !== 'clear' && $folder_id <= 0)))) {
+		return new WP_Error('invalid_folder_id', __('Use a real folder for add or remove, and zero for clear.', 'simply-gallery-block'), array('status' => 400));
+	}
 	$attachment_ids = $request->get_param('attachment_ids');
 
 	if (!is_array($attachment_ids)) {
 		$attachment_ids = array($attachment_ids);
 	}
 
-	$attachment_ids = array_values(array_filter(array_map('absint', $attachment_ids)));
+	$attachment_ids = array_values(array_unique(array_filter(array_map('absint', $attachment_ids))));
 	if (empty($attachment_ids)) {
 		return new WP_Error('empty_attachments', __('No media items were provided.', 'simply-gallery-block'), array('status' => 400));
 	}
@@ -988,17 +1180,58 @@ function pgc_sgb_media_folders_rest_assign_media(WP_REST_Request $request)
 
 	$updated = array();
 	$skipped = array();
+	$errors = array();
+	$items = array();
 
 	foreach ($attachment_ids as $attachment_id) {
 		if (!current_user_can('edit_post', $attachment_id) || get_post_type($attachment_id) !== 'attachment') {
 			$skipped[] = $attachment_id;
+			$errors[(string) $attachment_id] = __('This media item is unavailable or cannot be edited.', 'simply-gallery-block');
 			continue;
 		}
 
-		$terms = $folder_id > 0 ? array($folder_id) : array();
-		$result = wp_set_object_terms($attachment_id, $terms, PGC_SGB_MEDIA_FOLDER_TAXONOMY, false);
+		$before = wp_get_object_terms($attachment_id, PGC_SGB_MEDIA_FOLDER_TAXONOMY, array('fields' => 'ids'));
+		if (is_wp_error($before)) {
+			$skipped[] = $attachment_id;
+			$errors[(string) $attachment_id] = $before->get_error_message();
+			continue;
+		}
+		$before = array_map('intval', $before);
+		// Preserve old clients for single-folder items, but never let them erase multiple memberships.
+		if ($legacy && count($before) > 1) {
+			$result = new WP_Error('explicit_operation_required', __('This item belongs to multiple folders. Use an explicit folder operation.', 'simply-gallery-block'));
+		} elseif ($legacy) {
+			$result = wp_set_object_terms($attachment_id, $folder_id > 0 ? array($folder_id) : array(), PGC_SGB_MEDIA_FOLDER_TAXONOMY, false);
+		} elseif ($operation === 'add') {
+			$result = wp_set_object_terms($attachment_id, array($folder_id), PGC_SGB_MEDIA_FOLDER_TAXONOMY, true);
+		} elseif ($operation === 'remove') {
+			$result = wp_remove_object_terms($attachment_id, array($folder_id), PGC_SGB_MEDIA_FOLDER_TAXONOMY);
+		} else {
+			$result = wp_set_object_terms($attachment_id, array(), PGC_SGB_MEDIA_FOLDER_TAXONOMY, false);
+		}
+
+		$after = wp_get_object_terms($attachment_id, PGC_SGB_MEDIA_FOLDER_TAXONOMY, array('fields' => 'ids'));
+		if (!is_wp_error($after)) {
+			$after = array_values(array_map('intval', $after));
+			$items[] = array('id' => $attachment_id, 'folderIds' => $after);
+			$expected = $before;
+			if ($legacy || $operation === 'clear') {
+				$expected = $legacy && $folder_id > 0 ? array($folder_id) : array();
+			} elseif ($operation === 'add') {
+				$expected = array_values(array_unique(array_merge($before, array($folder_id))));
+			} else {
+				$expected = array_values(array_diff($before, array($folder_id)));
+			}
+			if (!is_wp_error($result) && (array_diff($expected, $after) || array_diff($after, $expected))) {
+				$result = new WP_Error('folder_update_failed', __('Folder memberships could not be updated as requested. Refresh and try again.', 'simply-gallery-block'));
+			}
+		}
+		if (!is_wp_error($result) && is_wp_error($after)) {
+			$result = $after;
+		}
 		if (is_wp_error($result)) {
 			$skipped[] = $attachment_id;
+			$errors[(string) $attachment_id] = $result->get_error_message();
 			continue;
 		}
 
@@ -1010,6 +1243,9 @@ function pgc_sgb_media_folders_rest_assign_media(WP_REST_Request $request)
 			'updated'   => $updated,
 			'skipped'   => $skipped,
 			'folder_id' => $folder_id,
+			'operation' => $legacy ? 'legacy' : $operation,
+			'items'     => $items,
+			'errors'    => (object) $errors,
 			'counts'    => pgc_sgb_media_folders_get_counts(),
 		)
 	);
@@ -1218,6 +1454,15 @@ function pgc_sgb_media_folders_rest_save_panel_state(WP_REST_Request $request)
 
 function pgc_sgb_media_folders_register_rest_routes()
 {
+	register_rest_route('pgc-sgb/v1', '/media-folders/media/memberships', array(
+		'methods' => WP_REST_Server::CREATABLE,
+		'callback' => 'pgc_sgb_media_folders_rest_get_memberships',
+		'permission_callback' => 'pgc_sgb_media_folders_can_use',
+		'args' => array('attachment_ids' => array(
+			'required' => true, 'type' => 'array', 'minItems' => 1, 'maxItems' => 100,
+			'items' => array('type' => 'integer', 'minimum' => 1),
+		)),
+	));
 	register_rest_route(
 		'pgc-sgb/v1',
 		'/media-folders/folders',
@@ -1233,6 +1478,7 @@ function pgc_sgb_media_folders_register_rest_routes()
 				'permission_callback' => 'pgc_sgb_media_folders_can_use',
 				'args'                => array(
 					'name'  => array('required' => true, 'type' => 'string'),
+					'description' => array('type' => 'string'),
 					'color' => array('required' => false, 'type' => 'string'),
 					'order' => array('required' => false, 'type' => 'integer'),
 				),
@@ -1248,11 +1494,45 @@ function pgc_sgb_media_folders_register_rest_routes()
 				'methods'             => WP_REST_Server::EDITABLE,
 				'callback'            => 'pgc_sgb_media_folders_rest_update_folder',
 				'permission_callback' => 'pgc_sgb_media_folders_can_use',
+				'args' => array(
+					'name' => array('type' => 'string'),
+					'description' => array('type' => 'string'),
+					'color' => array('type' => 'string'),
+				),
 			),
 			array(
 				'methods'             => WP_REST_Server::DELETABLE,
 				'callback'            => 'pgc_sgb_media_folders_rest_delete_folder',
 				'permission_callback' => 'pgc_sgb_media_folders_can_use',
+			),
+		)
+	);
+
+	register_rest_route(
+		'pgc-sgb/v1',
+		'/media-folders/folders/(?P<id>\d+)/duplicate',
+		array(
+			'methods' => WP_REST_Server::CREATABLE,
+			'callback' => 'pgc_sgb_media_folders_rest_duplicate_folder',
+			'permission_callback' => 'pgc_sgb_media_folders_can_use',
+			'args' => array(
+				'name' => array('required' => true, 'type' => 'string'),
+				'description' => array('required' => true, 'type' => 'string'),
+				'color' => array('required' => true, 'type' => 'string'),
+			),
+		)
+	);
+
+	register_rest_route(
+		'pgc-sgb/v1',
+		'/media-folders/folders/(?P<id>\d+)/details',
+		array(
+			'methods' => WP_REST_Server::READABLE,
+			'callback' => 'pgc_sgb_media_folders_rest_details',
+			'permission_callback' => 'pgc_sgb_media_folders_can_use',
+			'args' => array(
+				'id' => array('required' => true, 'type' => 'integer', 'minimum' => 1),
+				'page' => array('type' => 'integer', 'minimum' => 1, 'default' => 1),
 			),
 		)
 	);
@@ -1265,8 +1545,9 @@ function pgc_sgb_media_folders_register_rest_routes()
 			'callback'            => 'pgc_sgb_media_folders_rest_assign_media',
 			'permission_callback' => 'pgc_sgb_media_folders_can_use',
 			'args'                => array(
-				'folder_id'      => array('required' => true, 'type' => 'integer'),
-				'attachment_ids' => array('required' => true, 'type' => 'array'),
+				'folder_id'      => array('required' => true, 'type' => 'integer', 'minimum' => 0),
+				'operation'      => array('required' => false, 'type' => 'string', 'enum' => array('add', 'remove', 'clear')),
+				'attachment_ids' => array('required' => true, 'type' => 'array', 'minItems' => 1, 'items' => array('type' => 'integer', 'minimum' => 1)),
 			),
 		)
 	);
@@ -1451,6 +1732,11 @@ function pgc_sgb_media_folders_load_assistant_page()
 			isset($_POST['pgc_sgb_media_folders_show_modal']) ? '1' : '0'
 		);
 
+		pgc_sgb_media_folders_update_folder_sort(array(
+			'folderSortBy' => isset($_POST['pgc_sgb_media_folders_sort_by']) ? wp_unslash($_POST['pgc_sgb_media_folders_sort_by']) : null,
+			'folderOrder' => isset($_POST['pgc_sgb_media_folders_order']) ? wp_unslash($_POST['pgc_sgb_media_folders_order']) : null,
+		));
+
 		$assistant_per_page = isset($_POST['pgc_sgb_media_assistant_per_page'])
 			? absint(wp_unslash($_POST['pgc_sgb_media_assistant_per_page']))
 			: 20;
@@ -1597,6 +1883,23 @@ function pgc_sgb_media_folders_render_assistant_screen_settings($settings, $scre
 				<?php esc_html_e('Remember selected folder in Assistant', 'simply-gallery-block'); ?>
 			</label>
 			<div class="pgc-spacer"></div>
+			<h4><?php esc_html_e('Folders', 'simply-gallery-block'); ?></h4>
+			<label for="pgc-sgb-media-folders-sort-by">
+				<span><?php esc_html_e('Sort by', 'simply-gallery-block'); ?></span>
+				<select id="pgc-sgb-media-folders-sort-by" name="pgc_sgb_media_folders_sort_by">
+					<option value="date" <?php selected(pgc_sgb_media_folders_get_folder_sort_by(), 'date'); ?>><?php esc_html_e('Date added', 'simply-gallery-block'); ?></option>
+					<option value="name" <?php selected(pgc_sgb_media_folders_get_folder_sort_by(), 'name'); ?>><?php esc_html_e('Name', 'simply-gallery-block'); ?></option>
+				</select>
+			</label>
+			<label for="pgc-sgb-media-folders-order">
+				<span><?php esc_html_e('Order', 'simply-gallery-block'); ?></span>
+				<select id="pgc-sgb-media-folders-order" name="pgc_sgb_media_folders_order">
+					<option value="ASC" <?php selected(pgc_sgb_media_folders_get_folder_order(), 'ASC'); ?>><?php esc_html_e('Sort ascending', 'simply-gallery-block'); ?></option>
+					<option value="DESC" <?php selected(pgc_sgb_media_folders_get_folder_order(), 'DESC'); ?>><?php esc_html_e('Sort descending', 'simply-gallery-block'); ?></option>
+				</select>
+			</label>
+			<hr />
+			<h4><?php esc_html_e('Items', 'simply-gallery-block'); ?></h4>
 			<label for="pgc-sgb-media-assistant-per-page">
 				<span><?php esc_html_e('Items per page', 'simply-gallery-block'); ?></span>
 				<select id="pgc-sgb-media-assistant-per-page" name="pgc_sgb_media_assistant_per_page">
@@ -1752,6 +2055,8 @@ function pgc_sgb_media_folders_enqueue_admin_assets($hook = '')
 			'assistant'       => array(
 				'perPage'                => pgc_sgb_media_folders_get_assistant_per_page(),
 				'sortBy'                 => pgc_sgb_media_folders_get_assistant_sort_by(),
+				'folderSortBy' => pgc_sgb_media_folders_get_folder_sort_by(),
+				'folderOrder' => pgc_sgb_media_folders_get_folder_order(),
 				'order'                  => pgc_sgb_media_folders_get_assistant_order(),
 				'rememberSelectedFolder' => $remember_assistant_folder,
 				'pickerMode'             => pgc_sgb_media_folders_get_assistant_picker_mode(),

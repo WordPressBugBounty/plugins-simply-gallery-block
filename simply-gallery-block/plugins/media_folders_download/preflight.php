@@ -15,7 +15,14 @@ function pgc_sgb_media_downloads_preflight($request)
 	if (!$capabilities['canPrepare']) {
 		return new WP_Error('storage_unavailable', __('Archive preparation is unavailable. Ask an administrator to check ZIP Downloads in the plugin settings.', 'simply-gallery-block'), array('status' => 409));
 	}
-	$page = max(1, (int) $request['page']);
+	$result = pgc_sgb_media_downloads_scan_folder($folder_id, max(1, (int) $request['page']));
+	$result['limits'] = pgc_sgb_archives_get_limits();
+	return rest_ensure_response($result);
+}
+
+/** Shared read-only original statistics, independent of archive capabilities and limits. */
+function pgc_sgb_media_downloads_scan_folder($folder_id, $page)
+{
 	$query = new WP_Query(array(
 		'post_type' => 'attachment',
 		'post_status' => 'inherit',
@@ -27,10 +34,9 @@ function pgc_sgb_media_downloads_preflight($request)
 		'update_post_term_cache' => false,
 		'tax_query' => array(array('taxonomy' => PGC_SGB_MEDIA_FOLDER_TAXONOMY, 'field' => 'term_id', 'terms' => array($folder_id), 'include_children' => false)),
 	));
-	$limits = pgc_sgb_archives_get_limits();
 	$uploads = wp_upload_dir(null, false);
 	$root = realpath($uploads['basedir']);
-	$result = array('limits' => $limits, 'totalFiles' => (int) $query->found_posts, 'checked' => 0, 'fileCount' => 0, 'bytes' => 0, 'issueCount' => 0, 'issues' => array(), 'hasMore' => $page < (int) $query->max_num_pages);
+	$result = array('totalFiles' => (int) $query->found_posts, 'checked' => 0, 'fileCount' => 0, 'bytes' => 0, 'issueCount' => 0, 'issues' => array(), 'hasMore' => $page < (int) $query->max_num_pages);
 	foreach ($query->posts as $post) {
 		$result['checked']++;
 		$reason = '';
@@ -65,7 +71,7 @@ function pgc_sgb_media_downloads_preflight($request)
 			}
 		}
 	}
-	return rest_ensure_response($result);
+	return $result;
 }
 
 function pgc_sgb_media_downloads_register_preflight()
