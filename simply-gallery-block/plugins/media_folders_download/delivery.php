@@ -4,6 +4,23 @@ if (!defined('ABSPATH')) {
 	exit;
 }
 
+/** Validate a finished snapshot without consulting its manifest or original files. */
+function pgc_sgb_archives_validate_artifact($id, $record)
+{
+	$key = $record['artifact_key'];
+	$config = pgc_sgb_archives_storage_config();
+	$directory = $config['path'] . '/' . $key;
+	$path = $directory . '/archive.zip';
+	clearstatcache(true, $path);
+	if ($config['error'] || !preg_match('/\Ajob-' . (int) $id . '-[a-f0-9]{32}\z/', $key)
+		|| $key !== get_post_meta($id, '_pgc_sgb_archive_workspace', true)
+		|| is_link($config['path']) || is_link($directory) || is_link($path)
+		|| !is_file($path) || !is_readable($path) || @filesize($path) !== $record['artifact_bytes']) {
+		return pgc_sgb_archives_error('artifact_unavailable', __('The archive is unavailable. Please prepare it again.', 'simply-gallery-block'), 409);
+	}
+	return $path;
+}
+
 /** Shared transfers / exclusive cleanup. Stable inode; never unlink this file. */
 function pgc_sgb_archives_transfer_lock($exclusive = false)
 {
@@ -64,6 +81,9 @@ function pgc_sgb_archives_finish_removal($id, $writer)
 function pgc_sgb_archives_delete_request($request)
 {
 	$id = (int) $request['id'];
+	if (!pgc_sgb_archives_can_access(get_post($id), 'delete')) {
+		return pgc_sgb_archives_error('archive_forbidden', __('You do not have permission to delete this archive.', 'simply-gallery-block'), 403);
+	}
 	$job = pgc_sgb_archives_get($id);
 	if (is_wp_error($job)) {
 		return $job;

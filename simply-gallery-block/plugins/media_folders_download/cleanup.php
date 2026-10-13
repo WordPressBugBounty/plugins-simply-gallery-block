@@ -70,7 +70,7 @@ function pgc_sgb_archives_cleanup_record($id, $purge, $can_remove)
 		$folder = get_term($r['folder_id'], PGC_SGB_MEDIA_FOLDER_TAXONOMY);
 		if (!empty($r['expires_at']) && $r['expires_at'] <= time()) {
 			$next['state'] = 'expired';
-		} elseif (!$folder || is_wp_error($folder) || $r['source_revision'] !== pgc_sgb_archives_folder_revision($r['folder_id'])) {
+		} elseif (!$folder || is_wp_error($folder)) {
 			$next['state'] = 'invalidated';
 		} elseif (empty($r['deleted_at'])) {
 			return 'keep';

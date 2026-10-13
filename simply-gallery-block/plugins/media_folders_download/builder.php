@@ -1,5 +1,5 @@
 <?php
-/** Bounded Free ZIP creation and owner-only status API. No file delivery. */
+/** Bounded Free ZIP creation and folder-operator status API. No file delivery. */
 if (!defined('ABSPATH')) {
 	exit;
 }
@@ -18,29 +18,41 @@ function pgc_sgb_archives_public_status($id)
 		$state = 'deleting';
 	}
 	if ($state === 'ready') {
-		if ($job['source_current'] !== true) {
+		$folder = get_term($r['folder_id'], PGC_SGB_MEDIA_FOLDER_TAXONOMY);
+		if (!$folder || is_wp_error($folder)) {
 			$state = 'invalidated';
 		} elseif ($r['expires_at'] <= time()) {
 			$state = 'expired';
-		} else {
-			$manifest = pgc_sgb_archives_validate_manifest($id);
-			$config = pgc_sgb_archives_storage_config();
-			$artifact = $config['path'] . '/' . $r['artifact_key'] . '/archive.zip';
-			if (is_wp_error($manifest) || !preg_match('/\Ajob-' . (int) $id . '-[a-f0-9]{32}\z/', $r['artifact_key'])
-				|| is_link($artifact) || !is_file($artifact) || @filesize($artifact) !== $r['artifact_bytes']) {
-				$state = 'invalidated';
-			}
+		} elseif (is_wp_error(pgc_sgb_archives_validate_artifact($id, $r))) {
+			$state = 'invalidated';
 		}
 	}
-	return array('id' => (int) $id, 'state' => $state, 'filename' => $r['download_name'] ?? pgc_sgb_archives_download_name($r['folder_label']), 'fileCount' => $r['source_count'], 'bytes' => $r['artifact_bytes'], 'expiresAt' => $r['expires_at'], 'remainingSeconds' => max(0, $r['expires_at'] - time()), 'downloadUrl' => $state === 'ready' ? add_query_arg(array('action' => 'pgc_sgb_archive_download', 'archive_id' => $id, '_wpnonce' => wp_create_nonce('pgc_sgb_archive_download_' . $id)), admin_url('admin-post.php')) : '', 'errorCode' => $r['error_code']);
+	$ready_at = (int) ($r['ready_at'] ?? 0);
+	return array('id' => (int) $id, 'state' => $state, 'canDelete' => pgc_sgb_archives_can_access(get_post($id), 'delete'), 'folderChanged' => $job['source_current'] === false, 'readyAt' => $ready_at, 'readyAtLabel' => $ready_at ? wp_date(get_option('date_format') . ' ' . get_option('time_format'), $ready_at) : '', 'filename' => $r['download_name'] ?? pgc_sgb_archives_download_name($r['folder_label']), 'fileCount' => $r['source_count'], 'bytes' => $r['artifact_bytes'], 'expiresAt' => $r['expires_at'], 'remainingSeconds' => max(0, $r['expires_at'] - time()), 'downloadUrl' => $state === 'ready' ? add_query_arg(array('action' => 'pgc_sgb_archive_download', 'archive_id' => $id, '_wpnonce' => wp_create_nonce('pgc_sgb_archive_download_' . $id)), admin_url('admin-post.php')) : '', 'errorCode' => $r['error_code']);
 }
 
 function pgc_sgb_archives_latest($folder_id, $token = '')
 {
-	$meta = array(array('key' => '_pgc_sgb_archive_folder', 'value' => (int) $folder_id));
-	if ($token !== '') {
-		$meta[] = array('key' => '_pgc_sgb_archive_request', 'value' => $token);
+	if ($token === '') {
+		wp_cache_delete($folder_id, 'term_meta');
+		$id = (int) get_term_meta($folder_id, '_pgc_sgb_archive_current', true);
+		if (!$id) { return 0; }
+		wp_cache_delete($id, 'post_meta');
+		$job = pgc_sgb_archives_get($id);
+		if (is_wp_error($job)) {
+			// Completed cleanup releases the slot without exposing the old snapshot.
+			$record = get_post_meta($id, '_pgc_sgb_archive_record', true);
+			if (is_array($record) && !empty($record['deleted_at']) && (int) $record['folder_id'] === (int) $folder_id) { return 0; }
+			return $job;
+		}
+		return (int) $job['record']['folder_id'] === (int) $folder_id
+			&& ($job['record']['access_scope'] ?? '') === 'folder' ? $id : 0;
 	}
+	// Request retries remain scoped to their creator; current selection is folder-wide.
+	$meta = array(
+		array('key' => '_pgc_sgb_archive_folder', 'value' => (int) $folder_id),
+		array('key' => '_pgc_sgb_archive_request', 'value' => $token),
+	);
 	$query = new WP_Query(array('post_type' => 'pgc_sgb_archive', 'post_status' => 'private', 'author' => get_current_user_id(), 'posts_per_page' => 1, 'orderby' => 'ID', 'order' => 'DESC', 'fields' => 'ids', 'no_found_rows' => true, 'meta_query' => $meta));
 	return $query->posts ? (int) $query->posts[0] : 0;
 }
@@ -156,14 +168,20 @@ function pgc_sgb_archives_prepare_request($request)
 		$token = $request['request_token'];
 		$existing = pgc_sgb_archives_latest($folder_id, $token);
 		if ($existing) {
+			wp_cache_delete($existing, 'post_meta');
 			pgc_sgb_archives_fail($existing, 'archive_interrupted');
 			return pgc_sgb_archives_public_status($existing);
 		}
 		$latest = pgc_sgb_archives_latest($folder_id);
+		if (is_wp_error($latest)) { return $latest; }
 		if ($latest) {
 			$status = pgc_sgb_archives_public_status($latest);
-			if (!is_wp_error($status) && $status['state'] === 'ready') {
+			if (is_wp_error($status)) { return $status; }
+			if ($status['state'] === 'ready') {
 				return $status;
+			}
+			if (!pgc_sgb_archives_can_access(get_post($latest), 'delete') && $status['state'] !== 'deleted') {
+				return pgc_sgb_archives_error('archive_forbidden', __('You do not have permission to replace this archive.', 'simply-gallery-block'), 403);
 			}
 			if (!is_wp_error($status) && in_array($status['state'], array('expired', 'invalidated'), true)) {
 				$previous = pgc_sgb_archives_get($latest);
@@ -183,10 +201,17 @@ function pgc_sgb_archives_prepare_request($request)
 			pgc_sgb_archives_fail($id, 'archive_record_write_failed');
 			return pgc_sgb_archives_error('archive_record_write_failed', __('Archive operation could not be saved.', 'simply-gallery-block'), 500);
 		}
+		// The writer lock serializes creation and assignment for every folder operator.
+		$assigned = update_term_meta($folder_id, '_pgc_sgb_archive_current', $id);
+		if (is_wp_error($assigned) || !$assigned) {
+			pgc_sgb_archives_fail($id, 'archive_current_write_failed');
+			return pgc_sgb_archives_error('archive_current_write_failed', __('The folder archive could not be assigned. Please retry.', 'simply-gallery-block'), 500);
+		}
 		// Fatal shutdown can leave partial files; retain a diagnosable record for cleanup.
 		register_shutdown_function(function () use ($id) {
 			$last = error_get_last();
 			if ($last && in_array($last['type'], array(E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR), true)) {
+				wp_cache_delete($id, 'post_meta');
 				pgc_sgb_archives_fail($id, 'archive_interrupted');
 			}
 		});
@@ -199,6 +224,7 @@ function pgc_sgb_archives_prepare_request($request)
 function pgc_sgb_archives_status_request($request)
 {
 	$id = pgc_sgb_archives_latest((int) $request['id']);
+	if (is_wp_error($id)) { return $id; }
 	if (!$id) {
 		return array('state' => 'none');
 	}
@@ -218,6 +244,7 @@ function pgc_sgb_archives_status_request($request)
 		$writer = pgc_sgb_archives_acquire_writer();
 		if (!is_wp_error($writer)) {
 			try {
+				wp_cache_delete($id, 'post_meta');
 				pgc_sgb_archives_fail($id, 'archive_interrupted');
 				pgc_sgb_archives_remove_workspace($id, $writer);
 				$status = pgc_sgb_archives_public_status($id);

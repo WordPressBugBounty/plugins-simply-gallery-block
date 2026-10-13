@@ -6,7 +6,7 @@ Tags: gallery, image gallery, media library folders, video gallery, lightbox
 Requires at least: 6.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.4.4
+Stable tag: 3.4.5
 License: GPL-2.0
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,7 @@ Use SimpLy Media Assistant to keep photo shoots, events, products, or project ma
 Open Media > SimpLy Assistant to browse, upload, and organize your files. You can also enable the folder sidebar in the native WordPress Media Library to work in its familiar grid or list view.
 
 * Add the same media file to multiple virtual folders without copying originals or changing their URLs.
+* Let authors organize their own files and folders, with built-in permissions to protect other users' collections.
 * Find and reuse media by filtering with SimpLy folders and tags.
 * Upload files into the active folder and organize existing media into collections.
 * Edit folder names, descriptions with basic HTML formatting, and colors in one dialog.
@@ -262,6 +263,14 @@ Manual YouTube and Vimeo gallery items are supported in the gallery workflow. Dy
 No. The gallery and lightbox features do not require cookies, and the plugin does not collect visitor data. External services such as YouTube or Vimeo may apply their own privacy behavior when their embedded players are loaded.
 
 == Changelog ==
+= 3.4.5 =
+* Security: Enforced folder ownership and WordPress capabilities when editing, deleting, duplicating, or changing folder contents, with additional permission checks for ZIP access and shared tag removal.
+* Added: Ownership indicators for users with limited permissions, highlighting their media files and folder counters in the Assistant and Media Library.
+* Improved: Permission-aware selection and drag-and-drop, disabled folder actions with explanations, and clearer feedback for completed, partially completed, or denied media operations. Media picker selection remains unchanged.
+* Improved: Faster permission handling using local ownership data for Media Library interactions and checking folder actions only when opening the context menu.
+* Changed: Completed folder ZIPs now remain downloadable snapshots until expiry. Folder changes are reported alongside the archive creation time without deleting the snapshot; source validation during ZIP creation is preserved.
+* Tweak: Updated Freemius SDK to the latest version
+
 = 3.4.4 =
 * Added: Multiple folder memberships per media file, with updated drag-and-drop, click actions, and Attachment Organization controls.
 * Added: Folder editor with descriptions and colors, collection duplication without copying files, and folder details.

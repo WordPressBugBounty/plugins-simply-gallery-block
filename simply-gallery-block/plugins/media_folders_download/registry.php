@@ -49,14 +49,25 @@ function pgc_sgb_archives_error($code, $message, $status = 400)
 	return new WP_Error($code, $message, array('status' => $status));
 }
 
-/** Owner-only service boundary. Background cleanup will need its own internal API. */
+/** Explicit archive capabilities, independent of current source membership. */
+function pgc_sgb_archives_can_access($post, $operation = 'read')
+{
+	if (!is_user_logged_in() || !current_user_can('upload_files') || !$post || $post->post_type !== 'pgc_sgb_archive') {
+		return false;
+	}
+	$own = (int) $post->post_author === get_current_user_id();
+	if ($operation === 'delete') {
+		return current_user_can('delete_posts') && ($own || current_user_can('delete_others_posts'));
+	}
+	return $own || current_user_can('edit_others_posts');
+}
+
+/** Authorized snapshot reads; sharing will have a separate recipient boundary. */
 function pgc_sgb_archives_get($id)
 {
 	$post = get_post((int) $id);
-	if (!is_user_logged_in() || !current_user_can('upload_files') || !$post
-		|| $post->post_type !== 'pgc_sgb_archive'
-		|| (int) $post->post_author !== get_current_user_id()) {
-		return pgc_sgb_archives_error('archive_unavailable', __('Archive operation is unavailable.', 'simply-gallery-block'), 404);
+	if (!pgc_sgb_archives_can_access($post)) {
+		return pgc_sgb_archives_error('archive_forbidden', __('You do not have permission to access this archive.', 'simply-gallery-block'), 403);
 	}
 	$record = get_post_meta($post->ID, '_pgc_sgb_archive_record', true);
 	if (!is_array($record) || !isset($record['schema_version'], $record['state']) || $record['schema_version'] !== 1) {
@@ -92,6 +103,7 @@ function pgc_sgb_archives_create($folder_id)
 	}
 	$record = array(
 		'schema_version' => 1,
+		'access_scope' => 'folder',
 		'folder_id' => (int) $folder_id,
 		'folder_label' => $folder->name,
 		'download_name' => pgc_sgb_archives_download_name($folder->name),

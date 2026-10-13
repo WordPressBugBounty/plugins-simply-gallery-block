@@ -189,7 +189,7 @@ function pgc_sgb_archives_prepare_manifest($id, $writer)
 	return $result;
 }
 
-/** Revalidate before building/reusing; never pass this manifest to a public API. */
+/** Revalidate during assembly and finalization; never pass this manifest to a public API. */
 function pgc_sgb_archives_validate_manifest($id)
 {
 	$job = pgc_sgb_archives_get($id);

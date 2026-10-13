@@ -6,7 +6,7 @@
  * Description: Simply Gallery is a mixed media gallery plugin that lets you combine images, video, and audio in a single gallery. Supports HTML5 video, YouTube, Vimeo, and VideoPress, and adds a customizable lightbox to native WordPress galleries.
  * Author: GalleryCreator
  * Author URI: https://blockslib.com/
- * Version: 3.4.4
+ * Version: 3.4.5
  * Text Domain: simply-gallery-block
  * Domain Path: /languages
  * License: GPL2+
@@ -23,7 +23,7 @@ if ( !defined( 'ABSPATH' ) ) {
 if ( function_exists( 'pgc_sgb_fs' ) ) {
     pgc_sgb_fs()->set_basename( false, __FILE__ );
 } else {
-    define( 'PGC_SGB_VERSION', '3.4.4' );
+    define( 'PGC_SGB_VERSION', '3.4.5' );
     define( 'PGC_SGB_SLUG', 'simply-gallery-block' );
     define( 'PGC_SGB_BLOCK_PREF', 'wp-block-pgcsimplygalleryblock-' );
     define( 'PGC_SGB_PLUGIN_SLUG', 'pgc-simply-gallery-plugin' );
@@ -376,7 +376,16 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
         return implode( ',', $names );
     }
 
+    function pgc_sgb_can_delete_stored_tags() {
+        return current_user_can( 'upload_files' ) && current_user_can( 'edit_others_posts' );
+    }
+
     function pgc_sgb_update_tags_list(  $tagsArr, $delete = NULL  ) {
+        if ( !is_null( $delete ) && !pgc_sgb_can_delete_stored_tags() ) {
+            return new WP_Error('rest_forbidden', __( 'You do not have permission to remove tags from shared storage.', 'simply-gallery-block' ), array(
+                'status' => 403,
+            ));
+        }
         if ( is_string( $tagsArr ) ) {
             $inputTags = array_filter( array_map( 'trim', explode( ',', $tagsArr ) ) );
         } elseif ( is_array( $tagsArr ) ) {
@@ -422,13 +431,16 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
         $tagsArr = array_values( array_filter( array_map( 'sanitize_text_field', $tagsArr ) ) );
         $deleted = array();
         $skipped = array();
+        $errors = array();
         foreach ( $postIDs as $postId ) {
             if ( $attachment_only && get_post_type( $postId ) !== 'attachment' ) {
                 $skipped[] = $postId;
+                $errors[$postId] = __( 'Media item not found.', 'simply-gallery-block' );
                 continue;
             }
             if ( !current_user_can( 'delete_post_meta', $postId ) ) {
                 $skipped[] = $postId;
+                $errors[$postId] = __( 'You do not have permission to edit this media item.', 'simply-gallery-block' );
                 continue;
             }
             foreach ( $tagsArr as $tag ) {
@@ -437,12 +449,16 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
                 }
                 if ( $tag !== '' && delete_post_meta( $postId, 'pgc_sgb_tag', $tag ) ) {
                     $deleted[$postId][] = $tag;
+                } elseif ( in_array( $tag, get_post_meta( $postId, 'pgc_sgb_tag' ), true ) ) {
+                    $skipped[] = $postId;
+                    $errors[$postId] = __( 'Some tags could not be removed.', 'simply-gallery-block' );
                 }
             }
         }
         return array(
             'deleted' => $deleted,
-            'skipped' => $skipped,
+            'skipped' => array_values( array_unique( $skipped ) ),
+            'errors'  => $errors,
         );
     }
 
@@ -794,6 +810,11 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
                 }
                 break;
             case 'update_tags_list':
+                if ( $json['action'] === 'delete' && !pgc_sgb_can_delete_stored_tags() ) {
+                    wp_send_json_error( array(
+                        'message' => __( 'You do not have permission to remove tags from shared storage.', 'simply-gallery-block' ),
+                    ), 403 );
+                }
                 $value = $json['value'];
                 if ( current_user_can( 'edit_posts' ) ) {
                     $out['message'][$json['key']] = true;
