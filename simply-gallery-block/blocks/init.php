@@ -255,24 +255,28 @@ function pgc_sgb_block_assets() {
         PGC_SGB_VERSION,
         false
     );
-    wp_localize_script( PGC_SGB_SLUG . '-js', 'PGC_SGB_MEDIA_FOLDERS', array(
-        'restBase'        => '/pgc-sgb/v1/media-folders',
-        'nonce'           => wp_create_nonce( 'wp_rest' ),
-        'currentFolderId' => -1,
-        'isCollapsed'     => false,
-        'showMediaModal'  => false,
-        'mode'            => 'select',
-        'uploadUrl'       => admin_url( 'upload.php' ),
-        'mediaUploadUrl'  => esc_url_raw( rest_url( 'wp/v2/media' ) ),
-        'assistantUrl'    => admin_url( 'upload.php?page=pgc-sgb-media-assistant' ),
-        'assistant'       => array(
-            'perPage'                => ( function_exists( 'pgc_sgb_media_folders_get_assistant_per_page' ) ? pgc_sgb_media_folders_get_assistant_per_page() : 20 ),
-            'sortBy'                 => ( function_exists( 'pgc_sgb_media_folders_get_assistant_sort_by' ) ? pgc_sgb_media_folders_get_assistant_sort_by() : 'date' ),
-            'order'                  => ( function_exists( 'pgc_sgb_media_folders_get_assistant_order' ) ? pgc_sgb_media_folders_get_assistant_order() : 'DESC' ),
-            'rememberSelectedFolder' => false,
-            'pickerMode'             => ( function_exists( 'pgc_sgb_media_folders_get_assistant_picker_mode' ) ? pgc_sgb_media_folders_get_assistant_picker_mode() : 'select' ),
-        ),
-    ) );
+    if ( is_admin() ) {
+        wp_localize_script( PGC_SGB_SLUG . '-script', 'PGC_SGB_MEDIA_FOLDERS', array(
+            'restBase'        => '/pgc-sgb/v1/media-folders',
+            'nonce'           => wp_create_nonce( 'wp_rest' ),
+            'currentFolderId' => -1,
+            'isCollapsed'     => false,
+            'showMediaModal'  => false,
+            'mode'            => 'select',
+            'uploadUrl'       => admin_url( 'upload.php' ),
+            'mediaUploadUrl'  => esc_url_raw( rest_url( 'wp/v2/media' ) ),
+            'assistantUrl'    => admin_url( 'upload.php?page=pgc-sgb-media-assistant' ),
+            'assistant'       => array(
+                'perPage'                => ( function_exists( 'pgc_sgb_media_folders_get_assistant_per_page' ) ? pgc_sgb_media_folders_get_assistant_per_page() : 20 ),
+                'sortBy'                 => ( function_exists( 'pgc_sgb_media_folders_get_assistant_sort_by' ) ? pgc_sgb_media_folders_get_assistant_sort_by() : 'date' ),
+                'order'                  => ( function_exists( 'pgc_sgb_media_folders_get_assistant_order' ) ? pgc_sgb_media_folders_get_assistant_order() : 'DESC' ),
+                'folderSortBy'           => ( function_exists( 'pgc_sgb_media_folders_get_folder_sort_by' ) ? pgc_sgb_media_folders_get_folder_sort_by() : 'date' ),
+                'folderOrder'            => ( function_exists( 'pgc_sgb_media_folders_get_folder_order' ) ? pgc_sgb_media_folders_get_folder_order() : 'ASC' ),
+                'rememberSelectedFolder' => false,
+                'pickerMode'             => ( function_exists( 'pgc_sgb_media_folders_get_assistant_picker_mode' ) ? pgc_sgb_media_folders_get_assistant_picker_mode() : 'select' ),
+            ),
+        ) );
+    }
     wp_enqueue_script( PGC_SGB_SLUG . '-editor' );
     /** Main Blocks Translatrion */
     if ( function_exists( 'wp_set_script_translations' ) ) {

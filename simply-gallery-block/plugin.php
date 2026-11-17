@@ -6,7 +6,7 @@
  * Description: Simply Gallery is a mixed media gallery plugin that lets you combine images, video, and audio in a single gallery. Supports HTML5 video, YouTube, Vimeo, and VideoPress, and adds a customizable lightbox to native WordPress galleries.
  * Author: GalleryCreator
  * Author URI: https://blockslib.com/
- * Version: 3.4.5
+ * Version: 3.5.0
  * Text Domain: simply-gallery-block
  * Domain Path: /languages
  * License: GPL2+
@@ -23,7 +23,7 @@ if ( !defined( 'ABSPATH' ) ) {
 if ( function_exists( 'pgc_sgb_fs' ) ) {
     pgc_sgb_fs()->set_basename( false, __FILE__ );
 } else {
-    define( 'PGC_SGB_VERSION', '3.4.5' );
+    define( 'PGC_SGB_VERSION', '3.5.0' );
     define( 'PGC_SGB_SLUG', 'simply-gallery-block' );
     define( 'PGC_SGB_BLOCK_PREF', 'wp-block-pgcsimplygalleryblock-' );
     define( 'PGC_SGB_PLUGIN_SLUG', 'pgc-simply-gallery-plugin' );
@@ -760,6 +760,8 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
                             }
                         }
                         $postExt = $my_post;
+                        // Preserve the attachment permalink under the gallery item's field name.
+                        $postExt['postlink'] = $my_post['link'];
                         if ( $attachment_meta_data ) {
                             if ( isset( $attachment_meta_data['sizes'] ) && isset( $postExt['sizes'] ) ) {
                                 if ( isset( $postExt['sizes']['large'] ) && isset( $attachment_meta_data['sizes']['large'] ) ) {
@@ -779,6 +781,19 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
                     }
                     $out['message']['success'] = true;
                     $out['message']['itemsMetaData'] = $itemsMetaDataCollection;
+                    // History synchronization must distinguish deletion from a filtered/partial result.
+                    if ( !empty( $json['verifyMissingAttachments'] ) && !empty( $query['post__in'] ) ) {
+                        $requested_ids = array_values( array_unique( array_map( 'absint', (array) $query['post__in'] ) ) );
+                        $missing_ids = array();
+                        foreach ( $requested_ids as $requested_id ) {
+                            $requested_post = get_post( $requested_id );
+                            if ( !$requested_post || $requested_post->post_type === 'attachment' && $requested_post->post_status === 'trash' ) {
+                                $missing_ids[] = $requested_id;
+                            }
+                        }
+                        $out['message']['requestedIds'] = $requested_ids;
+                        $out['message']['missingIds'] = $missing_ids;
+                    }
                     $data = $postsWithMeta;
                 }
                 wp_reset_query();
@@ -1079,6 +1094,7 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
     }
     require_once plugin_dir_path( __FILE__ ) . 'blocks/init.php';
     require_once plugin_dir_path( __FILE__ ) . 'plugins/media_folders_download/init.php';
+    require_once plugin_dir_path( __FILE__ ) . 'plugins/media_folders_download/sharing-fallback.php';
     require_once plugin_dir_path( __FILE__ ) . 'plugins/init.php';
     require_once plugin_dir_path( __FILE__ ) . 'plugins/media_folders/init.php';
 }

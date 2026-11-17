@@ -699,10 +699,15 @@ function pgc_sgb_get_gallery_atr(WP_REST_Request $request)
 	if ($postId <= 0) {
 		return array();
 	}
+	$post = get_post($postId);
 	if (
-		get_post_field('post_type', $postId, 'raw') === PGC_SGB_POST_TYPE
-		&& get_post_status($postId) !== 'publish'
-	) return null;
+		!$post
+		|| $post->post_type !== PGC_SGB_POST_TYPE
+		|| !is_post_publicly_viewable($post)
+		|| post_password_required($post)
+	) {
+		return null;
+	}
 	$postData = get_post_field('post_content', $postId, 'raw');
 	if ($postData === '' || is_wp_error($postData)) return null;
 	$blocks = parse_blocks($postData);

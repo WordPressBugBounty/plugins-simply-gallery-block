@@ -61,7 +61,7 @@ function pgc_sgb_archives_cleanup_record($id, $purge, $can_remove)
 	$next = $r;
 	$terminal = in_array($r['state'], array('failed', 'invalidated', 'expired'), true);
 	$delete_requested = get_post_meta($id, '_pgc_sgb_archive_delete_requested', true);
-	if ($purge || $delete_requested) {
+	if ($purge || $delete_requested || pgc_sgb_archives_folder_finished($r['folder_id'])) {
 		$next['state'] = 'invalidated';
 	} elseif (in_array($r['state'], array('queued', 'building'), true)) {
 		$next['state'] = 'failed';
@@ -70,7 +70,7 @@ function pgc_sgb_archives_cleanup_record($id, $purge, $can_remove)
 		$folder = get_term($r['folder_id'], PGC_SGB_MEDIA_FOLDER_TAXONOMY);
 		if (!empty($r['expires_at']) && $r['expires_at'] <= time()) {
 			$next['state'] = 'expired';
-		} elseif (!$folder || is_wp_error($folder)) {
+		} elseif (!$folder || is_wp_error($folder) || !pgc_sgb_archives_is_current($id, $r)) {
 			$next['state'] = 'invalidated';
 		} elseif (empty($r['deleted_at'])) {
 			return 'keep';

@@ -6,7 +6,7 @@ Tags: gallery, image gallery, media library folders, video gallery, lightbox
 Requires at least: 6.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.4.5
+Stable tag: 3.5.0
 License: GPL-2.0
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -43,7 +43,7 @@ For more specialized projects, optional PLUS and PRO plans extend these tools: P
 
 = SimpLy Media Assistant - WordPress Media Library folders =
 
-Use SimpLy Media Assistant to keep photo shoots, events, products, or project materials in virtual folders within your WordPress Media Library. A file can belong to several collections without uploading another copy.
+Use [SimpLy Media Assistant](https://simplygallery.co/simply-media-assistant/) to keep photo shoots, events, products, or project materials in virtual folders within your WordPress Media Library. A file can belong to several collections without uploading another copy.
 
 Open Media > SimpLy Assistant to browse, upload, and organize your files. You can also enable the folder sidebar in the native WordPress Media Library to work in its familiar grid or list view.
 
@@ -67,6 +67,8 @@ Need a local copy of a photo shoot or a project's media? Right-click a SimpLy fo
 The archive uses the folder's name and remains available to its creator for repeat downloads for one hour. You can delete it sooner to free disk space; deleting a prepared ZIP does not delete the original media.
 
 ZIP Downloads in the plugin settings checks whether your hosting can prepare archives and lets administrators adjust the maximum total file size and number of files per archive. Start with the defaults and increase them to suit your hosting resources.
+
+[ZIP Sharing (PRO)](https://simplygallery.co/pro-zip-sharing/) lets you share a prepared collection with anyone who has its link or one selected WordPress user, with a configurable expiration date. Share the publication link or place a download card beside your gallery using a shortcode, and review download statistics from the publication panel.
 
 **Choose where the Assistant appears**
 
@@ -118,7 +120,7 @@ Lightbox features include touch gestures, keyboard navigation, mouse wheel contr
 
 = YouTube Feed and dynamic galleries =
 
-The YouTube Feed module turns YouTube playlists into a curated gallery workflow inside WordPress. You can build internal playlists, publish them with Quick Gallery Link, or use Dynamic Gallery Builder in the PRO plan for full design control.
+The [YouTube Feed module](https://simplygallery.co/youtube-feed/) turns YouTube playlists into a curated gallery workflow inside WordPress. You can build internal playlists, publish them with Quick Gallery Link, or use Dynamic Gallery Builder in the PRO plan for full design control.
 
 PRO dynamic gallery sources include:
 
@@ -133,7 +135,6 @@ PRO dynamic gallery sources include:
 = Main demos =
 
 * [Gallery blocks demo](https://simplygallery.co/)
-* [YouTube Feed](https://simplygallery.co/youtube-feed/)
 * [Albums Block demo](https://simplygallery.co/album-beginning/)
 * [Album Navigator Block demo](https://simplygallery.co/album-navigator/)
 * [SimpLy Lightbox and WordPress Native Gallery demo](https://simplygallery.co/simply-lightbox/)
@@ -166,9 +167,9 @@ You can transform the same gallery content between Masonry, Justified, Grid, and
 2. "Masonry" block in edit mode
 3. Activating and configuring the SimpLy lightbox in the post editor
 4. SimpLy Media Picker – adding images to the gallery
-5. SimpLy Assistant
-6. SimpLy Assistant - Attachment Organization (modal)
-7. SimpLy Assistant - Download Menu
+5. Media Library folders — one file in multiple folders, no duplicate uploads
+6. Assign files to folders and tags in one click
+7. Download a media folder's originals as a ZIP (free)
 8. Plugin global settings page
 9. SimpLy Lightbox – Classic view
 
@@ -263,6 +264,14 @@ Manual YouTube and Vimeo gallery items are supported in the gallery workflow. Dy
 No. The gallery and lightbox features do not require cookies, and the plugin does not collect visitor data. External services such as YouTube or Vimeo may apply their own privacy behavior when their embedded players are loaded.
 
 == Changelog ==
+= 3.5.0 =
+* Fixed: Uploading files with Unicode characters in their names in SimpLy Assistant.
+* Fixed: Duplicated and pasted gallery blocks now receive unique gallery IDs to prevent shared styles and cache conflicts between independent copies.
+* Fixed: Folder and tag assignment via click or drag-and-drop in SimpLy Assistant when selecting media across multiple pages.
+* Improved: Reduced unnecessary Undo/Redo steps caused by gallery initialization and editor UI updates, and synchronized the Items Manager with restored gallery contents.
+* Security: Fixed unauthorized access to gallery block data through the REST API. Restricted the endpoint to publicly accessible SimpLy Gallery posts and enforced password protection. Thanks to Wellknown.info for reporting this issue.
+* Added: [ZIP Sharing (PRO)](https://simplygallery.co/pro-zip-sharing/) with publication links, shortcode download cards, link-based or selected-user access, configurable expiration, and download statistics.
+
 = 3.4.5 =
 * Security: Enforced folder ownership and WordPress capabilities when editing, deleting, duplicating, or changing folder contents, with additional permission checks for ZIP access and shared tag removal.
 * Added: Ownership indicators for users with limited permissions, highlighting their media files and folder counters in the Assistant and Media Library.

@@ -117,7 +117,7 @@ function pgc_sgb_archives_prepare_manifest($id, $writer)
 	$record = $job['record'];
 	$folder_id = $record['folder_id'];
 	$term = get_term($folder_id, PGC_SGB_MEDIA_FOLDER_TAXONOMY);
-	if (!$term || is_wp_error($term)) {
+	if (!$term || is_wp_error($term) || pgc_sgb_archives_folder_finished($folder_id)) {
 		return pgc_sgb_archives_error('folder_missing', __('This folder no longer exists.', 'simply-gallery-block'), 404);
 	}
 	$workspace = pgc_sgb_archives_create_workspace($id, $writer);
@@ -197,6 +197,9 @@ function pgc_sgb_archives_validate_manifest($id)
 		return $job;
 	}
 	$record = $job['record'];
+	if (pgc_sgb_archives_folder_finished($record['folder_id'])) {
+		return pgc_sgb_archives_error('archive_folder_finished', __('Archive operations for this folder have ended.', 'simply-gallery-block'), 409);
+	}
 	$key = $record['manifest_reference'];
 	if ($job['source_current'] !== true || !preg_match('/\Ajob-' . (int) $id . '-[a-f0-9]{32}\z/', $key)) {
 		return pgc_sgb_archives_error('source_changed', __('The archive contents need to be prepared again.', 'simply-gallery-block'), 409);

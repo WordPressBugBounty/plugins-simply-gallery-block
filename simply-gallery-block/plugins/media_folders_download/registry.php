@@ -98,7 +98,7 @@ function pgc_sgb_archives_create($folder_id)
 		return pgc_sgb_archives_error('archive_forbidden', __('You cannot prepare archives.', 'simply-gallery-block'), 403);
 	}
 	$folder = get_term((int) $folder_id, PGC_SGB_MEDIA_FOLDER_TAXONOMY);
-	if ((int) $folder_id < 1 || !$folder || is_wp_error($folder)) {
+	if ((int) $folder_id < 1 || !$folder || is_wp_error($folder) || pgc_sgb_archives_folder_finished($folder_id)) {
 		return pgc_sgb_archives_error('folder_missing', __('This folder no longer exists.', 'simply-gallery-block'), 404);
 	}
 	$record = array(
@@ -191,6 +191,9 @@ function pgc_sgb_archives_transition($id, $expected, $state, $changes = array())
 		$next['started_at'] = $now;
 		$next['heartbeat_at'] = $now;
 	}
+	if (in_array($state, array('building', 'ready'), true) && pgc_sgb_archives_folder_finished($before['folder_id'])) {
+		return pgc_sgb_archives_error('archive_folder_finished', __('Archive operations for this folder have ended.', 'simply-gallery-block'), 409);
+	}
 	if ($state === 'ready') {
 		if (isset($current['source_current']) && $current['source_current'] === false) {
 			return pgc_sgb_archives_error('source_changed', __('The folder changed during preparation.', 'simply-gallery-block'), 409);
@@ -212,8 +215,43 @@ function pgc_sgb_archives_transition($id, $expected, $state, $changes = array())
 	if ($state === 'failed' && $next['error_code'] === '') {
 		return pgc_sgb_archives_error('archive_error_required', __('An archive failure reason is required.', 'simply-gallery-block'));
 	}
-	if (!update_post_meta($id, '_pgc_sgb_archive_record', $next, $before)) {
+	if ($state === 'ready') {
+		global $wpdb;
+		// Serialize the final write against durable folder cancellation, not just a cached read.
+		$written = $wpdb->query($wpdb->prepare(
+			"UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE post_id = %d
+			AND meta_key = %s AND meta_value = %s
+			AND NOT EXISTS (SELECT 1 FROM {$wpdb->options} o WHERE o.option_name = %s)
+			AND EXISTS (SELECT 1 FROM {$wpdb->term_taxonomy} t WHERE t.term_id = %d AND t.taxonomy = %s)",
+			maybe_serialize($next), $id, '_pgc_sgb_archive_record', maybe_serialize($before),
+			'pgc_sgb_archive_finished_folder_' . (int) $before['folder_id'],
+			(int) $before['folder_id'], PGC_SGB_MEDIA_FOLDER_TAXONOMY
+		)) === 1;
+		wp_cache_delete($id, 'post_meta');
+	} else {
+		$written = update_post_meta($id, '_pgc_sgb_archive_record', $next, $before);
+	}
+	if (!$written) {
 		return pgc_sgb_archives_error('archive_update_failed', __('Archive update failed or its status changed. Refresh and try again.', 'simply-gallery-block'), 409);
 	}
 	return pgc_sgb_archives_get($id);
+}
+
+/** Folder-scoped snapshots are deliverable only through their committed current slot.
+ * Legacy owner-scoped records retain their existing lifetime and access rules.
+ */
+function pgc_sgb_archives_is_current($id, $record)
+{
+	if (($record['access_scope'] ?? '') !== 'folder') { return true; }
+	wp_cache_delete((int) $record['folder_id'], 'term_meta');
+	return (int) get_term_meta($record['folder_id'], '_pgc_sgb_archive_current', true) === (int) $id;
+}
+
+/** Survives term/meta deletion and is never cached for the lifetime of a build request. */
+function pgc_sgb_archives_folder_finished($folder_id)
+{
+	$key = 'pgc_sgb_archive_finished_folder_' . (int) $folder_id;
+	wp_cache_delete($key, 'options');
+	wp_cache_delete('notoptions', 'options');
+	return (bool) get_option($key, false);
 }

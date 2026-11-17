@@ -393,15 +393,16 @@ function pgc_sgb_add_settings_page() {
             array('wp-components'),
             PGC_SGB_VERSION
         );
+        $settings_dependencies = array(
+            'wp-api',
+            'wp-element',
+            'wp-i18n',
+            'wp-components'
+        );
         wp_enqueue_script(
             PGC_SGB_PLUGIN_SLUG . '-main-settings-page-script',
             PGC_SGB_URL . 'dist/plugin_settings_page.build.js',
-            array(
-                'wp-api',
-                'wp-element',
-                'wp-i18n',
-                'wp-components'
-            ),
+            $settings_dependencies,
             PGC_SGB_VERSION,
             true
         );

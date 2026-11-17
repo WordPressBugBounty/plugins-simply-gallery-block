@@ -125,4 +125,5 @@ require_once __DIR__ . '/builder.php';
 require_once __DIR__ . '/delivery.php';
 require_once __DIR__ . '/limits.php';
 require_once __DIR__ . '/cleanup.php';
+require_once __DIR__ . '/lifecycle.php';
 require_once __DIR__ . '/uninstall.php';

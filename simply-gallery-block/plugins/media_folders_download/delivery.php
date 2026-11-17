@@ -120,6 +120,49 @@ function pgc_sgb_archives_register_delete_route()
 }
 add_action('rest_api_init', 'pgc_sgb_archives_register_delete_route');
 
+/** Emit an already authorized/opened archive while the caller holds its transfer lease. */
+function pgc_sgb_archives_emit_stream($stream, $id, $status, $observe = null)
+{
+	// A blocked/expired new request must not affect a transfer already admitted.
+	ignore_user_abort(true);
+	@ini_set('zlib.output_compression', '0');
+	while (ob_get_level() > 0) {
+		if (!@ob_end_clean()) {
+			break;
+		}
+	}
+	if (ob_get_level() > 0 || headers_sent()) {
+		if ($observe) { $observe('failures', 'headers_unavailable'); }
+		return false;
+	}
+	nocache_headers();
+	header('Cache-Control: private, no-store, max-age=0');
+	header('Content-Type: application/zip');
+	header('X-Content-Type-Options: nosniff');
+	header('Content-Length: ' . $status['bytes']);
+	header('Accept-Ranges: none');
+	header('Content-Disposition: attachment; filename="archive-' . $id . '.zip"; filename*=UTF-8\'\'' . rawurlencode($status['filename']));
+	if ($observe) { $observe('starts', ''); }
+	$emitted = 0;
+	$error = '';
+	while (!feof($stream)) {
+		$chunk = @fread($stream, 1024 * 1024);
+		if ($chunk === false) {
+			$error = 'stream_read_failed'; break;
+		}
+		$emitted += strlen($chunk);
+		echo $chunk; // Binary response; never HTML-escape ZIP bytes.
+		flush();
+		if (connection_aborted()) {
+			$error = 'client_disconnected'; break;
+		}
+	}
+	if (!$error && $emitted !== (int) $status['bytes']) { $error = 'stream_incomplete'; }
+	if ($observe) { $observe($error ? 'failures' : 'completed', $error); }
+	// True means a binary response began, even if incomplete: never append an HTML card.
+	return true;
+}
+
 function pgc_sgb_archives_download()
 {
 	$id = isset($_GET['archive_id']) ? absint($_GET['archive_id']) : 0;
@@ -154,35 +197,7 @@ function pgc_sgb_archives_download()
 			pgc_sgb_archives_unlock($lease);
 			wp_die(esc_html__('The archive changed. Please prepare it again.', 'simply-gallery-block'), '', array('response' => 409));
 		}
-		// A blocked/expired new request must not affect a transfer already admitted.
-		ignore_user_abort(true);
-		@ini_set('zlib.output_compression', '0');
-		while (ob_get_level() > 0) {
-			if (!@ob_end_clean()) {
-				break;
-			}
-		}
-		if (ob_get_level() > 0 || headers_sent()) {
-			return;
-		}
-		nocache_headers();
-		header('Cache-Control: private, no-store, max-age=0');
-		header('Content-Type: application/zip');
-		header('X-Content-Type-Options: nosniff');
-		header('Content-Length: ' . $status['bytes']);
-		header('Accept-Ranges: none');
-		header('Content-Disposition: attachment; filename="archive-' . $id . '.zip"; filename*=UTF-8\'\'' . rawurlencode($status['filename']));
-		while (!feof($stream)) {
-			$chunk = fread($stream, 1024 * 1024);
-			if ($chunk === false) {
-				break;
-			}
-			echo $chunk; // Binary response; never HTML-escape ZIP bytes.
-			flush();
-			if (connection_aborted()) {
-				break;
-			}
-		}
+		pgc_sgb_archives_emit_stream($stream, $id, $status);
 	} finally {
 		if (is_resource($stream)) {
 			fclose($stream);
