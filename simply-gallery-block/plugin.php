@@ -6,7 +6,7 @@
  * Description: Simply Gallery is a mixed media gallery plugin that lets you combine images, video, and audio in a single gallery. Supports HTML5 video, YouTube, Vimeo, and VideoPress, and adds a customizable lightbox to native WordPress galleries.
  * Author: GalleryCreator
  * Author URI: https://blockslib.com/
- * Version: 3.5.0
+ * Version: 3.5.1
  * Text Domain: simply-gallery-block
  * Domain Path: /languages
  * License: GPL2+
@@ -23,7 +23,7 @@ if ( !defined( 'ABSPATH' ) ) {
 if ( function_exists( 'pgc_sgb_fs' ) ) {
     pgc_sgb_fs()->set_basename( false, __FILE__ );
 } else {
-    define( 'PGC_SGB_VERSION', '3.5.0' );
+    define( 'PGC_SGB_VERSION', '3.5.1' );
     define( 'PGC_SGB_SLUG', 'simply-gallery-block' );
     define( 'PGC_SGB_BLOCK_PREF', 'wp-block-pgcsimplygalleryblock-' );
     define( 'PGC_SGB_PLUGIN_SLUG', 'pgc-simply-gallery-plugin' );
@@ -528,11 +528,16 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
         $out = array();
         $out['message'] = array();
         $data = array();
-        if ( isset( $_POST['props'] ) ) {
-            $globaldata = sanitize_text_field( wp_unslash( $_POST['props'] ) );
+        if ( isset( $_POST['props'] ) && is_string( $_POST['props'] ) ) {
+            // Decode the request before sanitizing the fields of the link metadata JSON.
+            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitize values after decoding the JSON so valid URL escape sequences are preserved.
+            $globaldata = wp_unslash( $_POST['props'] );
             $json = json_decode( $globaldata, true );
+            if ( ($json['type'] ?? '') !== 'update_post_meta' || ($json['key'] ?? '') !== 'pgc_sgb_link' ) {
+                $json = json_decode( sanitize_text_field( $globaldata ), true );
+            }
         }
-        switch ( $json['type'] ) {
+        switch ( $json['type'] ?? '' ) {
             case 'create_post_thumbnail':
                 $post_id = ( isset( $json['postId'] ) ? absint( $json['postId'] ) : 0 );
                 if ( $post_id && current_user_can( 'add_post_meta', $post_id ) && current_user_can( 'edit_post', $post_id ) && current_user_can( 'upload_files' ) ) {
@@ -647,7 +652,36 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
                     // Only allow plugin-owned meta keys.
                     $key = sanitize_key( $key_raw );
                     if ( strpos( $key, 'pgc_sgb_' ) === 0 ) {
-                        $out['message'][$key] = update_post_meta( $post_id, $key, sanitize_text_field( $value_raw ) );
+                        if ( $key === 'pgc_sgb_link' ) {
+                            if ( get_post_type( $post_id ) !== 'attachment' ) {
+                                $out['message'][$key] = false;
+                                break;
+                            }
+                            $value = pgc_sgb_sanitize_attachment_link_meta( $value_raw );
+                            if ( !is_object( json_decode( $value ) ) ) {
+                                $out['message'][$key] = false;
+                                break;
+                            }
+                            $updated = update_post_meta( $post_id, $key, wp_slash( $value ) );
+                            $saved = get_post_meta( $post_id, $key, true );
+                            $out['message'][$key] = $saved === $value && metadata_exists( 'post', $post_id, $key );
+                            if ( $out['message'][$key] ) {
+                                if ( !$updated ) {
+                                    pgc_sgb_remote_video_sync_provider( null, $post_id, $key );
+                                }
+                                $link_data = json_decode( $saved, true );
+                                $out['message']['linkText'] = $link_data['linkText'] ?? '';
+                                $link = pgc_sgb_remote_video_get_url_from_link_meta( $saved );
+                                $provider = ( wp_attachment_is_image( $post_id ) ? pgc_sgb_remote_video_get_provider( $link ) : '' );
+                                $out['message']['linkBadge'] = array(
+                                    'id'            => $post_id,
+                                    'embedProvider' => $provider,
+                                    'hasCustomLink' => $link !== '' && $provider === '',
+                                );
+                            }
+                        } else {
+                            $out['message'][$key] = update_post_meta( $post_id, $key, sanitize_text_field( $value_raw ) );
+                        }
                     } else {
                         $out['message']['error'] = 'Error: Invalid meta key';
                     }
@@ -1097,4 +1131,5 @@ if ( function_exists( 'pgc_sgb_fs' ) ) {
     require_once plugin_dir_path( __FILE__ ) . 'plugins/media_folders_download/sharing-fallback.php';
     require_once plugin_dir_path( __FILE__ ) . 'plugins/init.php';
     require_once plugin_dir_path( __FILE__ ) . 'plugins/media_folders/init.php';
+    require_once plugin_dir_path( __FILE__ ) . 'plugins/remote_video_import/init.php';
 }

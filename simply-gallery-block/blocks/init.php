@@ -211,7 +211,7 @@ function pgc_sgb_block_assets() {
             'show_in_rest'      => true,
             'type'              => 'string',
             'single'            => true,
-            'sanitize_callback' => 'sanitize_text_field',
+            'sanitize_callback' => 'pgc_sgb_sanitize_attachment_link_meta',
             'auth_callback'     => function () {
                 return current_user_can( 'edit_posts' );
             },
@@ -260,6 +260,7 @@ function pgc_sgb_block_assets() {
             'restBase'        => '/pgc-sgb/v1/media-folders',
             'nonce'           => wp_create_nonce( 'wp_rest' ),
             'currentFolderId' => -1,
+            'folderSearch'    => (string) get_user_meta( get_current_user_id(), 'pgc_sgb_media_assistant_folder_search', true ),
             'isCollapsed'     => false,
             'showMediaModal'  => false,
             'mode'            => 'select',

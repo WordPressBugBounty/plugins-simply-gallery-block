@@ -570,6 +570,24 @@ function pgc_sgb_media_folders_get_attachment_poster(  $attachment_id, $type, $d
     return ( count( $poster ) > 1 ? $poster : null );
 }
 
+/** Select a preview that preserves the full image's proportions, allowing resize rounding. */
+function pgc_sgb_media_folders_get_fit_preview(  $attachment_id  ) {
+    $full = wp_get_attachment_image_src( $attachment_id, 'full' );
+    if ( !$full || empty( $full[1] ) || empty( $full[2] ) ) {
+        return null;
+    }
+    foreach ( array('medium', 'medium_large', 'large') as $size ) {
+        $image = wp_get_attachment_image_src( $attachment_id, $size );
+        if ( !$image || empty( $image[1] ) || empty( $image[2] ) || $image[0] === $full[0] ) {
+            continue;
+        }
+        if ( abs( $image[1] * $full[2] - $image[2] * $full[1] ) <= max( $full[1], $full[2] ) ) {
+            return pgc_sgb_media_folders_normalize_image_src( $image );
+        }
+    }
+    return pgc_sgb_media_folders_normalize_image_src( $full );
+}
+
 function pgc_sgb_media_folders_normalize_media_item(  $post, $debug_posters = false  ) {
     $attachment_id = (int) $post->ID;
     $mime_type = get_post_mime_type( $attachment_id );
@@ -595,25 +613,49 @@ function pgc_sgb_media_folders_normalize_media_item(  $post, $debug_posters = fa
         'fields' => 'ids',
     ) );
     $tags = get_post_meta( $attachment_id, 'pgc_sgb_tag' );
+    $link_meta = get_post_meta( $attachment_id, 'pgc_sgb_link', true );
+    $link_data = ( is_string( $link_meta ) ? json_decode( $link_meta, true ) : null );
+    $link = pgc_sgb_remote_video_read_link( $link_data['link'] ?? '' );
+    $embed_provider = ( $type === 'image' ? pgc_sgb_remote_video_get_provider( $link ) : '' );
     $item = array(
-        'id'          => $attachment_id,
-        'author'      => (int) $post->post_author,
-        'title'       => get_the_title( $attachment_id ),
-        'filename'    => $filename,
-        'mime'        => ( $mime_type ? $mime_type : '' ),
-        'type'        => ( $type ? $type : '' ),
-        'url'         => ( $url ? $url : '' ),
-        'thumbnail'   => ( $thumbnail ? $thumbnail[0] : '' ),
-        'editUrl'     => get_edit_post_link( $attachment_id, 'raw' ),
-        'canOrganize' => current_user_can( 'edit_post', $attachment_id ),
-        'canDelete'   => current_user_can( 'delete_post', $attachment_id ),
-        'date'        => get_the_date( '', $attachment_id ),
-        'status'      => get_post_status( $attachment_id ),
-        'folderIds'   => ( is_wp_error( $folder_terms ) ? array() : array_map( 'intval', $folder_terms ) ),
-        'tags'        => array_values( array_map( 'sanitize_text_field', $tags ) ),
-        'parentId'    => (int) $post->post_parent,
-        'isAttached'  => (int) $post->post_parent > 0,
+        'id'            => $attachment_id,
+        'author'        => (int) $post->post_author,
+        'title'         => html_entity_decode( get_the_title( $attachment_id ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ),
+        'filename'      => $filename,
+        'mime'          => ( $mime_type ? $mime_type : '' ),
+        'type'          => ( $type ? $type : '' ),
+        'url'           => ( $url ? $url : '' ),
+        'thumbnail'     => ( $thumbnail ? $thumbnail[0] : '' ),
+        'fitPreview'    => pgc_sgb_media_folders_get_fit_preview( ( $poster ? $poster['id'] : $attachment_id ) ),
+        'embedProvider' => $embed_provider,
+        'hasCustomLink' => $link !== '' && $embed_provider === '',
+        'editUrl'       => get_edit_post_link( $attachment_id, 'raw' ),
+        'canOrganize'   => current_user_can( 'edit_post', $attachment_id ),
+        'canDelete'     => current_user_can( 'delete_post', $attachment_id ),
+        'date'          => get_the_date( '', $attachment_id ),
+        'status'        => get_post_status( $attachment_id ),
+        'folderIds'     => ( is_wp_error( $folder_terms ) ? array() : array_map( 'intval', $folder_terms ) ),
+        'tags'          => array_values( array_map( 'sanitize_text_field', $tags ) ),
+        'parentId'      => (int) $post->post_parent,
+        'isAttached'    => (int) $post->post_parent > 0,
     );
+    if ( $embed_provider !== '' ) {
+        $large = wp_get_attachment_image_src( $attachment_id, 'large' );
+        $item['embedPreview'] = array(
+            'src'    => pgc_sgb_remote_video_get_preview_url( $link, $embed_provider ),
+            'width'  => ( $large ? (int) $large[1] : 0 ),
+            'height' => ( $large ? (int) $large[2] : 0 ),
+        );
+    } elseif ( $link !== '' ) {
+        $href = esc_url_raw( $link, array('http', 'https') );
+        if ( $href !== '' ) {
+            $item['customLink'] = array(
+                'href'   => $href,
+                'target' => ( ($link_data['linkTarget'] ?? '') === '_blank' ? '_blank' : '_self' ),
+                'text'   => ( is_string( $link_data['linkText'] ?? null ) ? trim( html_entity_decode( $link_data['linkText'], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) : '' ),
+            );
+        }
+    }
     if ( $poster ) {
         $item['poster'] = $poster;
         if ( !empty( $poster['full'] ) ) {
@@ -672,6 +714,13 @@ function pgc_sgb_media_folders_rest_get_media(  WP_REST_Request $request  ) {
     $order = strtoupper( sanitize_key( (string) $request->get_param( 'order' ) ) );
     $exclude_ids = array_values( array_filter( wp_parse_id_list( $request->get_param( 'exclude_ids' ) ?? array() ) ) );
     $debug_posters = pgc_sgb_media_folders_is_poster_debug_enabled( $request );
+    $year = $request->get_param( 'year' );
+    $month = $request->get_param( 'monthnum' );
+    if ( is_null( $year ) !== is_null( $month ) ) {
+        return new WP_Error('invalid_media_date', __( 'Provide both a year and a month.', 'simply-gallery-block' ), array(
+            'status' => 400,
+        ));
+    }
     if ( !in_array( $per_page, array(20, 50, 100), true ) ) {
         $per_page = 20;
     }
@@ -701,12 +750,29 @@ function pgc_sgb_media_folders_rest_get_media(  WP_REST_Request $request  ) {
     if ( !empty( $exclude_ids ) ) {
         $args['post__not_in'] = $exclude_ids;
     }
+    if ( !is_null( $year ) ) {
+        $args['year'] = (int) $year;
+        $args['monthnum'] = (int) $month;
+    }
     $mime_query = pgc_sgb_media_folders_get_type_mime_query( $type );
     if ( !empty( $mime_query ) ) {
         $args['post_mime_type'] = $mime_query;
     }
     if ( $search !== '' ) {
         $args['s'] = $search;
+    }
+    $providers = pgc_sgb_remote_video_get_providers();
+    if ( isset( $providers[$type] ) ) {
+        $args['post_mime_type'] = 'image';
+        $args['meta_query'][] = array(
+            'key'   => '_pgc_sgb_embed_provider',
+            'value' => $type,
+        );
+    } elseif ( $type === 'image' ) {
+        $args['meta_query'][] = array(
+            'key'     => '_pgc_sgb_embed_provider',
+            'compare' => 'NOT EXISTS',
+        );
     }
     $args = pgc_sgb_media_folders_apply_query_filter( $args, $folder_id );
     if ( $tag !== '' ) {
@@ -735,18 +801,20 @@ function pgc_sgb_media_folders_rest_get_media(  WP_REST_Request $request  ) {
         $items[] = pgc_sgb_media_folders_normalize_media_item( $post, $debug_posters );
     }
     $response = rest_ensure_response( array(
-        'items'      => $items,
-        'total'      => (int) $query->found_posts,
-        'totalPages' => (int) $query->max_num_pages,
-        'page'       => $page,
-        'perPage'    => $per_page,
-        'folderId'   => $folder_id,
-        'type'       => ( $type === '' ? 'all' : $type ),
-        'tag'        => $tag,
-        'search'     => $search,
-        'sortBy'     => $sort_by,
-        'order'      => $order,
-        'excludeIds' => $exclude_ids,
+        'items'              => $items,
+        'availableProviders' => pgc_sgb_remote_video_get_available_providers(),
+        'currentMonth'       => wp_date( 'Y-m' ),
+        'total'              => (int) $query->found_posts,
+        'totalPages'         => (int) $query->max_num_pages,
+        'page'               => $page,
+        'perPage'            => $per_page,
+        'folderId'           => $folder_id,
+        'type'               => ( $type === '' ? 'all' : $type ),
+        'tag'                => $tag,
+        'search'             => $search,
+        'sortBy'             => $sort_by,
+        'order'              => $order,
+        'excludeIds'         => $exclude_ids,
     ) );
     wp_reset_postdata();
     return $response;
@@ -1389,6 +1457,21 @@ function pgc_sgb_media_folders_rest_save_active_folder(  WP_REST_Request $reques
     ) );
 }
 
+function pgc_sgb_media_folders_rest_save_folder_search(  WP_REST_Request $request  ) {
+    $query = sanitize_text_field( $request->get_param( 'query' ) );
+    $user_id = get_current_user_id();
+    $key = 'pgc_sgb_media_assistant_folder_search';
+    update_user_meta( $user_id, $key, wp_slash( $query ) );
+    if ( (string) get_user_meta( $user_id, $key, true ) !== $query ) {
+        return new WP_Error('folder_search_save_failed', __( 'Could not save folder search.', 'simply-gallery-block' ), array(
+            'status' => 500,
+        ));
+    }
+    return rest_ensure_response( array(
+        'query' => $query,
+    ) );
+}
+
 function pgc_sgb_media_folders_rest_save_panel_state(  WP_REST_Request $request  ) {
     if ( !pgc_sgb_media_folders_can_use() ) {
         return new WP_Error('rest_forbidden', __( 'Sorry, you are not allowed to update media folder state.', 'simply-gallery-block' ), array(
@@ -1418,6 +1501,17 @@ function pgc_sgb_media_folders_rest_get_folder_permissions(  WP_REST_Request $re
 }
 
 function pgc_sgb_media_folders_register_rest_routes() {
+    register_rest_route( 'pgc-sgb/v1', '/media-folders/user/folder-search', array(
+        'methods'             => WP_REST_Server::CREATABLE,
+        'callback'            => 'pgc_sgb_media_folders_rest_save_folder_search',
+        'permission_callback' => 'pgc_sgb_media_folders_can_use',
+        'args'                => array(
+            'query' => array(
+                'required' => true,
+                'type'     => 'string',
+            ),
+        ),
+    ) );
     register_rest_route( 'pgc-sgb/v1', '/media-folders/folders/(?P<id>\\d+)/permissions', array(
         'methods'             => WP_REST_Server::READABLE,
         'callback'            => 'pgc_sgb_media_folders_rest_get_folder_permissions',
@@ -1668,6 +1762,16 @@ function pgc_sgb_media_folders_register_rest_routes() {
         'callback'            => 'pgc_sgb_media_folders_rest_get_media',
         'permission_callback' => 'pgc_sgb_media_folders_can_use',
         'args'                => array(
+            'year'         => array(
+                'type'    => 'integer',
+                'minimum' => 1,
+                'maximum' => 9999,
+            ),
+            'monthnum'     => array(
+                'type'    => 'integer',
+                'minimum' => 1,
+                'maximum' => 12,
+            ),
             'folder_id'    => array(
                 'required' => false,
                 'type'     => 'integer',
@@ -2139,12 +2243,14 @@ function pgc_sgb_media_folders_enqueue_admin_assets(  $hook = ''  ) {
     );
     wp_localize_script( $script_handle, 'PGC_SGB_MEDIA_FOLDERS', array(
         'restBase'             => '/pgc-sgb/v1/media-folders',
+        'runProviderMigration' => $is_assistant_page && pgc_sgb_remote_video_can_run_migration() && empty( get_option( 'pgc_sgb_embed_provider_migration_v1' )['complete'] ),
         'downloadCapabilities' => pgc_sgb_media_downloads_get_ui_capabilities(),
         'canDeleteStoredTags'  => pgc_sgb_can_delete_stored_tags(),
         'currentUserId'        => get_current_user_id(),
         'canEditOthersPosts'   => current_user_can( 'edit_others_posts' ),
         'nonce'                => wp_create_nonce( 'wp_rest' ),
         'currentFolderId'      => (int) $active_folder_id,
+        'folderSearch'         => (string) get_user_meta( get_current_user_id(), 'pgc_sgb_media_assistant_folder_search', true ),
         'isCollapsed'          => (bool) $is_collapsed,
         'showMediaModal'       => pgc_sgb_media_folders_user_setting_enabled( PGC_SGB_MEDIA_FOLDERS_SHOW_MODAL_META ),
         'mode'                 => ( $is_assistant_page ? 'assistant' : (( $is_media_library ? 'sidebar' : 'modal' )) ),

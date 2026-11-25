@@ -6,7 +6,7 @@ Tags: gallery, image gallery, media library folders, video gallery, lightbox
 Requires at least: 6.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.5.0
+Stable tag: 3.5.1
 License: GPL-2.0
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,7 +21,7 @@ Bring photos, video, and audio together in the same gallery, whether you are pre
 
 = Ready out of the box =
 
-* Mixed media in one gallery: images, HTML5 video, audio, YouTube, Vimeo, and VideoPress.
+* Mix images, HTML5 video, and audio with YouTube, Vimeo, VideoPress, and TikTok embeds. Add videos by URL and play them in galleries and the lightbox. Free, no API keys required.
 * Block editor-first editing with 8 included gallery blocks and visual controls.
 * Responsive layouts with controls for desktop and smaller screens.
 * Lightweight YouTube and Vimeo galleries with one active video embed at a time.
@@ -49,7 +49,7 @@ Open Media > SimpLy Assistant to browse, upload, and organize your files. You ca
 
 * Add the same media file to multiple virtual folders without copying originals or changing their URLs.
 * Let authors organize their own files and folders, with built-in permissions to protect other users' collections.
-* Find and reuse media by filtering with SimpLy folders and tags.
+* Filter by folder, tag, or video service [(YouTube, Vimeo, VideoPress, and TikTok)](https://simplygallery.co/youtube-vimeo-videopress-tiktok-wordpress/) in SimpLy Assistant.
 * Upload files into the active folder and organize existing media into collections.
 * Edit folder names, descriptions with basic HTML formatting, and colors in one dialog.
 * Duplicate a folder's collection without copying its files, then adjust its membership independently.
@@ -98,7 +98,7 @@ Albums and Album Navigator are available in the free plugin. PLUS adds more visu
 
 = Tags Filter =
 
-Tags are managed directly inside the gallery block. In the Items Manager, each gallery item has a Tag menu where you can type tags separated by commas or choose from previously used SimpLy Tags.
+Tags are managed directly inside the gallery block. In the Items Manager, each gallery item has a Tag menu where you can type tags separated by commas or choose from previously used [SimpLy Tags](https://simplygallery.co/tags-filter/).
 
 Items Manager also includes a multi-select mode, so you can select a group of gallery items and add or remove tags for all selected items at once.
 
@@ -108,7 +108,7 @@ The basic Tags Filter is available for gallery blocks in the free plugin. PLUS /
 
 = Page-level lightbox for WordPress content =
 
-SimpLy Lightbox is more than a lightbox for SimpLy galleries. It can also work with regular WordPress content, including Image blocks, Gallery blocks, linked images, and Classic Editor gallery content.
+[SimpLy Lightbox](https://simplygallery.co/simply-lightbox/) is more than a lightbox for SimpLy galleries. It can also work with regular WordPress content, including Image blocks, Gallery blocks, linked images, and Classic Editor gallery content.
 
 When WordPress Image or Gallery blocks use the "Link images to media files" option, SimpLy Lightbox can open those images in a lightbox and group images from the same post or page into a browsable lightbox set.
 
@@ -163,15 +163,21 @@ You can transform the same gallery content between Masonry, Justified, Grid, and
 
 == Screenshots ==
 
-1. Adding a new gallery
-2. "Masonry" block in edit mode
-3. Activating and configuring the SimpLy lightbox in the post editor
-4. SimpLy Media Picker – adding images to the gallery
-5. Media Library folders — one file in multiple folders, no duplicate uploads
-6. Assign files to folders and tags in one click
-7. Download a media folder's originals as a ZIP (free)
-8. Plugin global settings page
-9. SimpLy Lightbox – Classic view
+1. Build a photo gallery with SimpLy Gallery in the WordPress block editor. Preview the layout, adjust thumbnails, and choose what happens when visitors click an image.
+2. Create a mixed media gallery with SimpLy Gallery. Combine photos, self-hosted video, audio, and embeds from YouTube, Vimeo, VideoPress, and TikTok.
+3. Start a gallery in the WordPress block editor. Upload media, select existing files, or import a collection from SimpLy folders and tags.
+4. Transform a native WordPress Gallery block into a SimpLy layout without selecting your images again. PLUS and PRO offer additional layouts.
+5. Use SimpLy Lightbox to group native WordPress images and galleries into one browsable set. Customize the lightbox settings for each page.
+6. Browse photos in the Classic view of SimpLy Lightbox using captions and thumbnail navigation. Zoom in, start a slideshow, or switch to fullscreen.
+7. Give visitors one place to explore related galleries. Use the Album Navigator block to arrange gallery covers and choose how galleries open.
+8. Save a SimpLy Gallery once and reuse it across WordPress posts and pages with a shortcode, or add it to an album.
+9. Create and manage albums in WordPress, then embed an entire album with a single shortcode.
+10. Organize your WordPress Media Library with SimpLy Media Assistant. Find photos, audio, videos, and embeds using folders, tags, and search.
+11. Add the same media item to multiple folders without duplicating files, and use tags to find it across collections.
+12. Download a folder’s original media files as one ZIP with the free plugin. Use ZIP Sharing in PRO to deliver the archive to recipients.
+13. Paste a YouTube, Vimeo, VideoPress, or TikTok link to create a reusable video embed for your galleries. No API keys or iframe code are required.
+14. Filter video embeds by service and narrow the results by folder, tag, upload date, or search term.
+15. Click the YouTube, Vimeo, VideoPress, or TikTok icon on a thumbnail to preview the video in SimpLy Media Assistant.
 
 
 == Installation ==
@@ -192,7 +198,7 @@ Yes. The free SimpLy Media Assistant includes virtual folders and tags for organ
 Yes. In the free plugin, right-click a SimpLy folder in the Assistant or the Media Library sidebar and choose Download. Create the archive, then use Download ZIP to save its original files. This is an authenticated admin workflow. ZIP availability and supported archive sizes depend on your hosting; checks and adjustable limits are available under ZIP Downloads in the plugin settings.
 
 = What media types can I use? =
-You can create galleries with images, self-hosted MP4 video, MP3 audio, YouTube, Vimeo, and VideoPress content.
+You can create galleries with images, self-hosted MP4 video, MP3 audio, and embeds from YouTube, Vimeo, VideoPress, and TikTok.
 
 = Can I create poster images for self-hosted videos? =
 Yes. For self-hosted video items, open the item menu in the Items Manager and choose Add Poster. You can select an image from the WordPress Media Library or capture a frame from the video. When a frame is used, SimpLy Gallery creates a new WordPress media attachment and uses it as the video poster.
@@ -258,12 +264,19 @@ Yes. Items Manager includes a multi-select mode, so you can select multiple gall
 Yes. Random ordering can be selected by the site owner in the WordPress admin. The frontend displays the randomized gallery output without adding a randomize button or extra control for visitors.
 
 = Are YouTube and Vimeo dynamic galleries included in the free plugin? =
-Manual YouTube and Vimeo gallery items are supported in the gallery workflow. Dynamic gallery sources, such as YouTube playlists and Vimeo collections, are available in PRO.
+Add individual YouTube, Vimeo, VideoPress, and TikTok videos by URL in the free plugin. Dynamic gallery sources, including YouTube playlists and Vimeo collections, are available in PRO.
 
 = Does SimpLy Gallery Blocks use cookies or collect visitor data? =
 No. The gallery and lightbox features do not require cookies, and the plugin does not collect visitor data. External services such as YouTube or Vimeo may apply their own privacy behavior when their embedded players are loaded.
 
 == Changelog ==
+= 3.5.1 =
+* Added: Free YouTube, Vimeo, VideoPress, and TikTok embeds by URL for galleries and the lightbox. Preview clips and filter by service in SimpLy Assistant. Upload a TikTok poster if needed. No API keys required.
+* Improved: SimpLy folder panels show seven folders initially, keep the active folder visible, and offer a Show more button for the full list.
+* Added: Search SimpLy folders by the beginning of their name. The filter is remembered for each user across the Assistant, Media Library, and media pickers. Attachment Organization has a separate search for folders available to add.
+* Added: An All dates filter alongside media search in SimpLy Assistant and SimpLy Media Picker. Choose an upload month and combine it with other media filters.
+* Improved: Hover over a media card in SimpLy Assistant or SimpLy Media Picker to see the full image or poster in its original proportions. The preview animates without resizing the card.
+
 = 3.5.0 =
 * Fixed: Uploading files with Unicode characters in their names in SimpLy Assistant.
 * Fixed: Duplicated and pasted gallery blocks now receive unique gallery IDs to prevent shared styles and cache conflicts between independent copies.
@@ -410,371 +423,3 @@ Disabling static HTML output helps prevent gallery images from being indexed or 
 * Updated: system for loading the list of FileBird folders
 * Tweak: Updated Freemius SDK (2.6.2)
 * Fixed: minor bug fixes
-
-= 3.1.9 =
-* Added: gallery status to the “SimpLy Saved Gallery” block
-* Added: gallery status to the "SimpLy Gallery" dashboard widget
-* Fixed: shortcode rendering for unpublished galleries
-* Tweak: Updated Freemius SDK (2.6.1)
-
-= 3.1.8 =
-* Added: support for YouTube Shorts
-* Fixed: AlbumNavigator - error displaying some galleries
-
-= 3.1.7 =
-* Added: mode for automatically loading pages after the first click of the "Load More" button [Live DEMO](https://simplygallery.co/portfolio2/)
-* Update: Freemius SDK
-* Fixed: Albums and AlbumNavigator - error displaying some galleries
-
-= 3.1.6 =
-* Update: Freemius SDK
-
-= 3.1.5 =
-* Tweak: Updated Freemius SDK (2.5.10).
-* Fix: Security fix.
-
-= 3.1.4 =
-* Update: Freemius SDK
-* Added: Gallery Settings -> 'Apply Global Preset' 
-* Optimized: Gallery Settings -> 'Use Global Preset'
-
-= 3.1.3 =
-* Update: Freemius SDK
-* Added: support for publishing folders from Vimeo
-* Fixed: management of dynamic galleries
-* Fixed: minor bug fixes
-
-= 3.1.2 =
-* Update: Freemius SDK
-* Fixed: minor bug fixes (video)
-
-= 3.1.1 =
-* Update: Freemius SDK
-
-= 3.1.0 =
-* Added: the ability to create a poster for a self-hosted video (.mp4). Just select a frame and set it as a featured image for your video.
-* Fixed: SimpLy Viewer - item description
-* Fixed: playlist icon in YouTube player
-
-= 3.0.9 =
- * Update: Freemius SDK
- * Update: for posters on video and audio files, only the Featured Image will be used.
- * Added: Clean Style for Viewer
- * Fixed: issue with download button (Viewer Block)
- * Fixed: minor bug fixes (Vimeo Categories)
-
- = 3.0.8 =
- * Added: New block with Slider - Viewer
- * Fixed: security vulnerability fixed - improved permission check for different user types for Ajax requests. With the assistance of Erwan Le Russo (Security Research Engineer, WPScan / Jetpack / Automattic)
- * Fixed: issue with lightboxes in Classic Editor
- * Fixed: minor bug fixes (Vimeo)
-
- = 3.0.7 =
- * Update: Freemius SDK (2.5.3)
-
-= 3.0.6 =
-* Added: multiselect option for Att. Category and Att. Tag (Media Library Assistant). (* PRO version).
-* Fixed: Minor bug fixes
-
-= 3.0.5 =
-* Added: random sorting mode for dynamic galleries (Att. Category, Att. Tag, FileBird Media Folders and SimpLy Tags)
-* Fixed: sorting system for Vimeo collections (as far as Vimeo API allows). The sequence of video clips must match the source on the Vimeo service.
-* Fixed: Minor bug fixes
-
-= 3.0.4 =
-* Updated: poster display method for audio files (MP3)
-* Fixed: Minor bug fixes
-
-= 3.0.3 =
-* Update: Freemius SDK
-* Fixed: Showcase Gallery Block - Next / Previous Buttons
-* Upgrade: Zoom mode changed in Lightbox
-* Fixed: Minor bug fixes 
-
-= 3.0.2 =
-* Added the ability to activate comments on gallery posts
-* Fixed: Lightbox description
-* Tried to fix the problem in Jetpack - Enable Lazy Loading for images
-* Fixed: Minor bug fixes 
-
-= 3.0.1 =
-* Fixed: issue with Share and Download buttons 
-* Fixed: Minor bug fixes 
-
-= 3.0.0 =
-* Updated: block data optimization
-* Added: dynamic mode for galleries - automatically update descriptions and tags for gallery items. Disabled by default. (* PLUS version).
-* Fixed: Minor bug fixes 
-
-= 2.4.0 =
-* Added: ability to create dynamic gallery for selected SimpLy tags (* PRO version).
-* Fixed: HTML validity errors  
-
-= 2.3.9 =
-* Added: new Showcase Gallery Block (* PLUS version)
-* Added: mode to play the entire YouTube playlist (* PLUS version).
-* Fixed: Minor bug fixes  
-
-= 2.3.8 =
-* Added: Responsiveness improvement. Grid, Masonry, Justified, Slider, Portfolio, Portfolio2 Blocks
-* Fixed: Minor bug fixes  
-
-= 2.3.7 =
-* Added: SimpLy Gallery permalinks. Settings -> Permalink Settings
-* Fixed: Minor bug fixes  
-
-= 2.3.6 =
-* Fixed: Freemius - Security fix
-
-= 2.3.5 =
-* Added: Block and Preset Selector for Album shortcode.
-* Added: Preset editor for Albums and AlbumNavigator blocks (* PLUS version).
-* Added: Mode - Display Image in original Size  in Lightbox (* PLUS version).
-* Fixed: Minor bug fixes
-
-= 2.3.4 =
-* Added: New Album Navigation Block (* PLUS version)
-* Fixed: Lightbox for Native Gallery Block and Native Image Block
-* Fixed: Major bug fixes
-
-= 2.3.3 =
-* Added: ability to publish WooCommerce Product List, Category or Tag (* PRO version)
-* Fixed: MLA Categories, Tags and FileBird Folders - convert to static mode (import content)
-* Fixed: Minor bug fixes
-
-= 2.3.2 =
-* Added: ability to publish Vimeo Showcase / Album, User Uploads, Channel, Category (* PRO version)
-* Added: Paged Mode - "Show more" for Grid, Masonry, Justified, Portfolio and Portfolio2 Blocks (* PLUS version)
-* Fixed: Minor bug fixes
-
-= 2.3.1 =
-* Fixed: Justified Block and Grid Block layouts (Gallery without background)
-* Fixed: Diamond Block - YouTube playlist
-
-= 2.3.0 =
-* Added: New Diamond Gallery Block (* PLUS version)
-* Fixed: Performance improvement
-* Fixed: Minor bug fixes
-
-= 2.2.6 =
-* Added: New Accordion Gallery Block (* PLUS version)
-* Added: New display mode (Fit) for images in the Slider Block (* PLUS version)
-* Fixed: Errors in the block settings panel in the site customization mode (Customize)
-* Fixed: Minor bug fixes
-
-= 2.2.5 =
-* Added: Improved block transformation mode
-* Fixed: Minor bug fixes
-
-= 2.2.4 =
-* Added: Items Manager - Bulk Select. It is now possible to easily add (remove) a tag to a group of items. And quick removal of a group of elements from the gallery is available
-* Fixed: Removed preloading for videos that have a poster
-
-= 2.2.3 =
-* Fixed: improved Blocks compatibility with iOS 11.3 - 13.3
-
-= 2.2.2 =
-* Fixed: Albums Block - Gallery Preloader
-* Fixed: Slider/Carousel Block - some CSS styles
-* Added: New Editor for Tags Filter - Premium Blocks
-* Added: DeepLinking for Tags Filter - Premium Blocks
-* Added: Ability to disable the "All" button in the Tags Filter - Premium Blocks    
-* Updated: Plugin Core - Performance improvement
-
-= 2.2.1 =
-* Fixed: Albums Lightbox Settings - Caption source
-* Fixed: All JavaScripts that the user added to the image caption, description and title will be filtered and, if the user has no rights, will be blocked. At the request of Vishnupriya Ilango of Fortinet's FortiGuard Labs ( CVE-2021-24667 ).
-
-= 2.2.0 =
-* Added: Albums Block
-* Fixed: Minor bug fixes
-
-= 2.1.7 =
-* Fixed: SimpLy Gallery Custom Post - blocking third-party blocks
-* Fixed: Lightbox for Native WordPress Gallery - erroneous actuation
-* Fixed: Performance improvement
-
-= 2.1.6 =
-* Fixed: conflict with Jetpack 
-
-= 2.1.5 =
-* Fixed: Performance improvement 
-* Fixed: Global Preset Priority Render
-* Added: Horizon Gallery Block (* PLUS version)
-
-= 2.1.4 =
-* Fixed: Performance improvement
-
-= 2.1.3 =
-* Fixed: Minor bug fixes
-* Added: Split Carousel Block (* PLUS version)
-
-= 2.1.2 =
-* Fixed: saving custom link with parameters
-* Fixed: transitions between blocks
-
-= 2.1.1 =
-* Added: source manager (item link or post) to share the item (Share Bar Settings)
-* Added: dynamic gallery displays YouTube Playlist (* PRO version)
-
-= 2.1.0 =
-* Added: Gallery Items Click Action - Attachment Page
-* Fixed: Random ordering
-* Fixed: Minor bugs
-
-= 2.0.2 =
-* Added: dynamic gallery by Media Library Assistant categories, tags (* PRO version)
-* Added: dynamic gallery displays FileBird folder (* PRO version)
-* Fixed: block styles
-
-= 2.0.1 =
-* Added: Elementor Widget for Saved SimpLy Gallery
-* Added: Dashboard Widget
-
-= 2.0.0 =
-* Updated: SEO Optimization
-* Added: SimpLy CPT and Shortcode
-* Added: SimpLy Gallery Widget
-* Added: Block for SimpLy CPT
-* Added: Storage mode for gallery. The SimpLy gallery will be available (in a simplified style) to visitors after deactivating the plugin or removing the block used
-* Updated: Save Method - no longer need additional publishing permissions for Editors (and other roles) in Multisite (WordPress MU)
-* For galleries created in earlier versions of the plugin, an update (Reload Button) and re-save procedure is required (Update Page / Post).
-
-= 1.8.4 =
-* Added: Custom CSS Editor for gallery blocks
-* Added: Support for Featured Images for videos (Media Library)
-* Added: Premium List Block
-
-= 1.8.3 =
-* Added: Capabilities editor for Admin and Editor Roles - Multisite (WordPress MU)
-* Fixed: WPML
-* Fixed: Portfolio & Portfolio2 Blocks Tags Filter
-
-= 1.8.2 =
-* Fixed: RTL support for Lightbox
-* Added: Premium TagsBox Block - Covers Gallery
-
-= 1.8.1 =
-* Fixed: SimpLy Slider - low quality video poster
-* Fixed: SimpLy Grid - low quality video poster
-* Added: Hidden Mode
-* Added: Premium Portfolio2 Block
-
-= 1.8.0 =
-* Added: Filters (by Tags) 
-* Added: Tags for Items
-* Added: Premium Portfolio Block
-* Fixed: Slider error on touch device
-* Fixed: bug Lightbox for WP Native Image
-
-= 1.7.4 =
-* Optimization: Slider Slideshow speed
-* Fixed: bug Lightbox for WP Native Image
-
-= 1.7.3 =
-* Added: New Block - Slider / Carousel Gallery
-* Fixed: bug Lightbox for native gallery with some buttons/links
-
-= 1.7.2 =
-* Fixed: Resolved conflict with plugins Smush and Jetpack - Lazy Load system
-
-= 1.7.1 =
-* Added: YouTube and Vimeo video gallery support
-* Added: Lightbox for native gallery for Archive Page (Category Page)
-* Fixed: Minor bug fixes
-
-= 1.7.0 =
-* Added: compatible with Yoast SEO Plugin - Images in the XML sitemap. Need reload SimpLy gallery data and update Post/Page
-* Fixed: Poster (Video and Audio) Error with small images
-
-= 1.6.0 =
-* Added: Now you can add poster for Video and Audio elements
-* Added: Export / Import gallery content
-* Added: Random sorting for gallery (frontend)
-* Fixed: Conflict with native Image block
-* Fixed: Minor bug fixes
-
-= 1.5.1 =
-* Optimization: performance improvement - Go to Block Sidebar -> Items Manager -> Reload Gallery and Update Post/Page
-* Added: Now you can attach an additional link to an element
-* Added: Ability to disable lazy loading mode
-* Added: Gallery without background mode (Block without padding)
-* Fixed: Minor bug fixes
-
-= 1.4.1 =
-* Fixed: HTML Tags in the caption
-* minor fix
-
-= 1.4.0 =
-* Big changes - Major Update!
-* Added: Supports Video MP4 and Audio MP3
-* Added: Gallery sorting by Uploaded date, Title, Caption or Custom
-* Added: Caption source - Caption, Title, Alt
-* Added: Thumbnail Caption Position (Top / Bottom)
-* Added: Option - disable Lightbox for a specific gallery
-* Added: Caption source for Lightbox - Caption, Title, Alt
-
-= 1.3.4 =
-* Fixed: plugin conflict - removing featured image of a WooCommerce product
-
-= 1.3.3 =
-* Fixed: Lightbox Plugin conflict with custom posts
-
-= 1.3.2 =
-* Fixed: removed duplicate button (Settings) on Plugins page
-
-= 1.3.1 =
-* Fixed: Error on page 404
-
-= 1.3.0 =
-* Added: Lightbox for native WordPress Gallery (Gutenberg/Classic Editor)
-* Added: Gutenberg Sidebar plugin for lightbox control.
-* Added: Settings Page for Global Lightbox Presets
-* Added: Settings Page for Blocks Presets
-
-= 1.2.2 =
-* Fixed: “Scroll down the page for the item you viewed” - smooth scroll theme compatibility
-* Fixed: input fields in the ColorPickers
-* Added: “Space between thumbnails” - increased limit to 40px
-* Added: Justified Thumbnail Size - XXL size (Height 450px +)
-* Added: partial support for HTML tags in pictures captions
-
-= 1.2.1 =
-* Fixed: Corrected the proportions of thumbnails when upload images directly into the gallery block
-
-= 1.2.0 =
-* Added: Global Preset - You modify the Global Preset to change all the galleries associated with this preset (automatically)
-* Added: For Masonry and Grid new settings - Columns, Min. Thumbnails width (Mobile Device)
-* Added: For Justified new option - Last Row Mode
-* Added: For Lightbox new transition mode - Fading/Slipping
-* Added: Thumbnails - native lazy loading
-* Changed: Data structure
-
-= 1.1.4 =
-* Fixed: Lightbox – Caption on Mobile Device
-* Fixed: Thumbnails – Caption on Touch Device
-
-= 1.1.3 =
-* Fixed: Lightbox Settings and some bugs
-* Added: Show image caption in Lightbox (this option will be disabled by default)
-* Added: Option - Prevent downloading in Lightbox (this option will be enabled by default)
-
-= 1.1.2 =
-* Fixed: Lightbox Settings - Copyright Alert
-
-= 1.1.1 =
-* Fixed: JavaScript issues with Grid and Justified Editors
-* Fixed: CSS Grid and Justified Blocks
-
-= 1.1.0 =
-* Fixed: minor JavaScript issues with Blocks Editor
-* Added: HTML5 Browser History support (deep linking)
-* Added: Lightbox - mouse wheel navigation mode
-* Added: auto scroll gallery (follow the one viewed in Lightbox)
-
-= 1.0.0 =
-* Initial release on WordPress.org. Enjoy!
-
-== Upgrade Notice == 
-= 1.0.0 =
-* Initial release on WordPress.org.
